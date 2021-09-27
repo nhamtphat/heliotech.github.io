@@ -37,7 +37,7 @@ export default function Home({ posts }) {
                 <article>
                   <div className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0 xl:items-baseline">
                     <dl>
-                      <dt className="sr-only">Published on</dt>
+                      <dt className="sr-only">Đăng lúc</dt>
                       <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
                         <time dateTime={date}>{formatDate(date)}</time>
                       </dd>
@@ -69,7 +69,7 @@ export default function Home({ posts }) {
                           className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                           aria-label={`Read "${title}"`}
                         >
-                          Read more &rarr;
+                          Xem tiếp &rarr;
                         </Link>
                       </div>
                     </div>
