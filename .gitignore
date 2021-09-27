@@ -17,6 +17,7 @@ public/sitemap.xml
 # production
 /build
 *.xml
+.env
 # rss feed
 /public/feed.xml 
 
