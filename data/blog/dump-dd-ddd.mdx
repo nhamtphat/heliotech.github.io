@@ -1,0 +1,64 @@
+---
+title: 'Các lệnh debug trên Laravel - dump, dd, ddd'
+date: 2021-09-28T01:46:00Z
+lastmod: '2021-09-28'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Tìm hiểu về những cách để in một biến ra màn hình, ưu nhược điểm khác nhau'
+layout: PostSimple
+---
+
+## Mục lục
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={2} />
+
+## Debug trong Laravel
+Ai là lập trình viên cũng đã từng debug, debug hay còn gọi là gỡ lỗi chương trình là công việc mà phần lớn thời gian chúng ta làm khi phát triển hay maintain một sản phẩm nào đó.
+Trong quá trình debug bạn sẽ cần biết được một thời điểm nào đó một biến bạn đang sử dụng đang có giá trị như thế nào vì thế các lệnh như `console.log()` trong Java, hay `print()` trong python không chỉ làm nhiệm vụ in ra màn hình thông tin cho người dùng cuối mà còn giúp lập trình viên rất nhiều trong quá trình phát triển sản phẩm.
+Trong khuôn khổ bài viết này mình sẽ cùng các bạn tìm hiểu về các lệnh "print" trong PHP và Laravel xem ưu và nhược điểm của từng phương pháp sẽ như thế nào nhé.
+## Lệnh `var_dump()`
+```php
+var_dump(mixed $value, mixed ...$values): void
+```
+Nếu bạn đã từng làm việc với PHP, bạn chắc sẽ biết được hàm này, `var_dump()`  chỉ đơn giản là in ra màn hình giá trị mà bạn truyền vào trong biến `$value`. Lệnh này không dừng thực thi chương trình, nếu bạn muốn dừng chương trình thì phải sử dụng thêm lệnh `die()`. Ví dụ như ta có biến `$a` như dưới đây:
+```php
+<?php
+$a = array(1, 2, array("a", "b", "c"));
+var_dump($a);
+die(); // Nếu muốn dừng chương trình
+?>
+```
+Dữ liệu trả về:
+```
+array(3) { ["a"]=> string(5) "apple" ["b"]=> string(6) "banana" ["c"]=> array(3) { [0]=> string(1) "x" [1]=> string(1) "y" [2]=> string(1) "z" } }
+```
+## Lệnh `dump()` trong Laravel
+Nhận thấy vấn đề chưa dừng lại ở đó, nếu trong trường hợp dữ liệu của bạn là một đối tượng có cả chục thuộc tính và các lớp lồng nhau, `var_dump()` vẫn trở thành cơn ác mộng. Laravel đơn giản vấn đề này bằng cách sử dụng lệnh `dump()`. Câu lệnh đơn giản này cho phép chúng ta in ra màn hình một đoạn HTML có thể tương tác được với mảng và đối tượng trong biến. Cách sử dụng cũng giống như hàm `var_dump()` ở trên:
+```php
+<?php
+$a = array(1, 2, array("a", "b", "c"));
+dump($a);
+die(); // Nếu muốn dừng chương trình
+?>
+```
+![](/posts/dump-dd-ddd/dump.png)
+## Lệnh `dd()` trong Laravel
+Rất nhiều trường hợp ta muốn in ra dữ liệu và dừng chương trình tại đó (`die()`). Laravel vẫn cung cấp cho chúng ta một câu lệnh ngắn gọn nhưng vô cùng tiện ít, đó là `dd()` - có nghĩa là `dump and die`.
+```php
+<?php
+$a = array(1, 2, array("a", "b", "c"));
+dd($a);
+?>
+```
+![](/posts/dump-dd-ddd/dd.png)
+## Lệnh `ddd()` trong Laravel
+Chúng ta đã có `dump`, chúng ta cũng có `dump and die`, vậy `ddd()` là gì? Lệnh này có nghĩa là **dump, die and debug**. Có thể bạn đã biết, Laravel đi kèm với một errors page cực kỳ hữu ích khi code chúng ta có lỗi, ở đó bạn có thể xem Track trace, Request và cả các query đã thực hiện.
+Lệnh `ddd()` sẽ cung cấp cho chúng ta tất cả những gì mình cần để có thể debug chương trình, cách sử dụng cũng như ở trên thôi, truyền vào tham số là biến mà bạn muốn dump ra:
+```php
+<?php
+$a = array(1, 2, array("a", "b", "c"));
+ddd($a);
+?>
+```
+![](/posts/dump-dd-ddd/ddd.png)
+## Kết bài
+Bài văn nào cũng cần có kết bài, mình cũng vừa biết đến lệnh `ddd()` gần đây thôi, nó rất hữu ích khi debug. Chúc các bạn coding vui vẻ và ít cần đến những hàm này nhé!
