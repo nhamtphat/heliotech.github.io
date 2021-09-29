@@ -12,7 +12,7 @@ layout: PostSimple
 <TOCInline toc={props.toc} exclude="Mục lục" toHeading={2} />
 
 ## Vấn đề
-Gần đây mình được khách hàng yêu cầu một tính năng tưởng chừng rất cũ nhưng đó giờ mình chưa làm bao giờ, đó là đăng xuất ra khỏi tất cả thiết bị khác sau khi đăng nhập. Có thể hiểu là không thể sử dụng đồng thời trên nhiều thiết bị.
+Gần đây mình được khách hàng yêu cầu một tính năng tưởng chừng rất cũ nhưng đó giờ mình chưa làm bao giờ, đó là **đăng xuất ra khỏi tất cả thiết bị khác sau khi đăng nhập**. Có thể hiểu là **không thể sử dụng đồng thời trên nhiều thiết bị**. Mình nghĩ đây cũng là một feature quốc dân nên làm bài này để chia sẻ cũng như note lại cho mình.
 
 ## Giải pháp với PHP
 Đối với một dự án PHP thông thường, mình sẽ nghĩ đến giải pháp tạo một session_token và lưu nó lại nó đăng nhập, nếu đăng nhập ở một thiết bị khác, token đó sẽ được tạo lại và không còn khớp với token cũ nữa. Và mình chỉ cần kiểu tra token đó trong phương thức checkAuth của mình.
