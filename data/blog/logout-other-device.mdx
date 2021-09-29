@@ -21,7 +21,7 @@ Lúc nào cũng vậy, Laravel luôn có giải pháp cho những vấn đề th
 
 ### Bước 1. Bật middleware AuthenticateSession ở Http\Kernel.php
 Mở file `App\Http\Kernel.php` lên và uncomment cái middleware nhé:
-```php
+```php {3} showLineNumbers
 'web' => [
     // ...
     \Illuminate\Session\Middleware\AuthenticateSession::class,
@@ -32,13 +32,14 @@ Mở file `App\Http\Kernel.php` lên và uncomment cái middleware nhé:
 Bây giờ công việc còn lại chỉ là thêm đoạn mã `Auth::logoutOtherDevices($currentPassword);` vào chỗ nào mà bạn muốn ứng dụng sẽ thực hiện việc log out trên tất cả trình duyệt khác.
 
 Ở đây mình muốn logoutOtherDevices khi đăng nhập nên mình sẽ mở `AuthenticatedSessionController` ở action `store()` - action này thực hiện việc đăng nhập. Mình thêm dòng `logoutOtherDevices` bên dưới
-```php
+```php {1, 7} showLineNumbers
 use Illuminate\Support\Facades\Auth;
 
 public function store(LoginRequest $request)
 {
 	  $request->authenticate();
-	  Auth::logoutOtherDevices($request->password);
+
+	  Auth::logoutOtherDevices($request->password); // <= Đây nè
 
 	// ...
 }
@@ -46,7 +47,7 @@ public function store(LoginRequest $request)
 Và nó không hoạt động ❌
 
 Mình không biết  tại sao nhưng bây giờ mình thử để nó vào bên trong `authenticate()`
-```php
+```php {1, 15} showLineNumbers
 use Illuminate\Support\Facades\Auth;
 
 public function authenticate()
