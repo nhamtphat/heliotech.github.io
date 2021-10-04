@@ -1,0 +1,121 @@
+---
+title: 'Xử lý upload file ảnh trên Laravel'
+date: 2021-10-05T01:03:00Z
+lastmod: '2021-10-05'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Xử lý file sau khi được tải lên ứng dụng Laravel, tuỳ chỉnh tên file, cho phép xem file từ trình duyệt'
+layout: PostSimple
+---
+
+## Mục lục
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Upload file trên Laravel
+
+Một trong những tính năng quan trọng mà hầu hết mọi ứng dụng đều có đó chính là upload ảnh hay file lên hệ thống. Có thể bạn dùng nó trong chức năng cập nhật ảnh đại diện, hay tải lên ảnh sản phẩm hay gì đó tương tự.
+
+Bài viết nằm nhằm mục đích cung cấp cho các bạn kiến thức mì ăn liền để bạn có thể note lại khi cần xử lý upload ảnh trên Laravel
+
+### Tạo project Laravel thông qua composer
+
+Đầu tiên bạn cần cài đặt composer, sau đó hãy tạo một project Laravel (Xem thêm: [Cài đặt laravel trên Mac](/install-laravel-on-mac)), nếu bạn đã có project thì bạn không cần làm bước này nhé:
+
+```bash
+$ composer create-project laravel/laravel --prefer-dist <project-name>
+```
+
+Sau khi tạo xong thì start ứng dụng lên:
+
+```bash
+$ cd <project-name>
+$ php artisan serve
+```
+
+### Tạo form upload file
+
+Hãy tạo một form bình thường với HTML, nhưng lưu ý, trong thẻ `form` bạn cần phải có thuộc tính `enctype="multipart/form-data"` và method phải là `POST`:
+
+```html
+<form action="/upload" method="post" enctype="multipart/form-data">
+  <label for="avatar">Image:</label>
+  <input type="file" id="avatar" name="avatar">
+  <input type="submit" value="Submit">
+</form>
+```
+
+Ở trên mình tạo đơn giản một form HTML cho phép upload một file lên ứng dụng.
+
+### Controller xử lý upload file
+
+```php
+protected function upload(Request $request)
+{
+    $request->validate([
+        'avatar' => ['required', 'image']
+    ]);
+
+    $path = $request->file('avatar')->store('avatars');
+    // Hãy lưu lại path trong CSDL
+}
+```
+
+Với phương thức `store()` tham số đầu tiên chính là đường dẫn thư mục bạn muốn lưu file, phương thức này cũng sẽ tự động tạo một tên ngẫu nhiên cho file bạn vừa upload lên
+
+### Để có thể truy cập từ internet
+
+Nếu bạn muốn ảnh đó có thể truy cập từ bên ngoài, bạn cần thêm vào thư mục `public` ví dụ:
+
+```php
+$path = $request->file('avatar')->store('public/avatars');
+```
+
+Và tất nhiên, đừng quên tạo symlink để có thể  truy cập từ thư mục `/public` của Laravel:
+
+```bash
+$ php artisan storage:link
+```
+
+### Tuỳ biến tên file tải lên
+
+Nếu bạn cần đặt tên file, hãy sử dụng phương thức `storeAs()` phương thức này sẽ cho phép bạn truyền vào tên file ở tham số thứ hai:
+
+```php
+$path = $request->file('avatar')->storeAs('avatars', 'newfile.png');
+```
+
+Thông thường mình sẽ lưu file dạng `<ten_file_goc>_<thoi_gian>.<duoi_file>` thì bạn có thể dùng đoạn code dưới đây:
+
+```php
+$filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+$extension = $file->getClientOriginalExtension();
+$fileNameToStore = $filename . '_' . time() . '.' . $extension;
+
+$path = $request->file('avatar')->storeAs('avatars', $fileNameToStore);
+```
+
+## Hiển thị hình ảnh đã lưu
+
+Sau khi bạn đã upload và lưu được lại được `$path` vậy thì bây giờ bạn cần hiển thị hình ảnh của nó thì làm như thế nào, đơn giản trong view bạn hãy gọi:
+
+```php
+<img src="{{ Storage::url($path) }}" alt="avatar" />
+```
+
+## Một số lỗi thường gặp khi upload file
+
+### Đã tải lên file, nhưng controller không nhận được file
+
+**Nguyên nhân 1:** Lỗi này thường là do cách bạn quên thuộc tính `enctype="multipart/form-data"` ở `form` hãy kiểm tra lại form nhé.
+
+**Nguyên nhân 2:** Do đặt sai input name, giá trị của thuộc tính `name=<input-name>` ở `form` tham số khi sử dụng `->file(<input-name>)` cần phải giống nhau, nếu khác nhau sẽ không nhận được file.
+
+### Đã tải lên file thành công, nhưng hiển thị lại 404
+
+**Nguyên nhân 1:** Thường gặp nhất là các bạn quên tạo symlink, tạo như thế nào thì các bạn có thể xem lại phần [Để có thể truy cập từ internet](#để-có-thể-truy-cập-từ-internet) ở trên nhé.
+
+**Nguyên nhân 2:** Đường dẫn file không nằm trong thư mục `public`, mặc định Laravel sẽ lưu tất cả file upload trong thư mục `/storage/app/` thư mục này được bảo vệ, bạn cần phải đưa file này vào thư mục `/storage/app/public` để có thể truy cập từ bên ngoài.
+
+## Lời kết
+
+Hy vọng bài viết này sẽ giúp ích cho các bạn mới làm quen với Laravel, chúc các bạn vui vẻ!
