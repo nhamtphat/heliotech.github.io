@@ -1,0 +1,84 @@
+---
+title: 'Hướng dẫn cài đặt Laravel 8'
+date: 2021-10-05T13:00:00Z
+lastmod: '2021-10-05'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Cách nhanh chóng để bắt đầu một ứng dụng Laravel, ngoài cài đặt thông qua composer create-project, hãy cùng mình khám phá thêm những cách khác nữa nhé'
+layout: PostSimple
+---
+
+## Mục lục
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Cài đặt Laravel 8
+
+### Cài đặt PHP
+
+Để cài đặt PHP bạn sẽ cần cài có thể cài đặt riêng lẻ (nhưng sẽ rất phức tạp). Một cách dễ dàng hơn là cài đặt thông qua Laragon (trên Windows/MacOS) hoặc Xampp (Win/Mac/Linux). **Bạn cần đảm bảo rằng thư mục php đã được thêm vào PATH của hệ thống.**
+
+### Cài đặt Composer
+
+Trên Windows, bạn chỉ cần [tải file exe về tại đây](https://getcomposer.org/Composer-Setup.exe) và chạy nó.
+
+Trên Mac và Linux, bạn hãy chạy các lệnh như dưới đây:
+
+```bash
+$ php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+
+$ php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+
+$ php composer-setup.php
+
+$ php -r "unlink('composer-setup.php');"
+```
+
+### Cài đặt Laravel 8
+
+**Cài thông qua `composer create-project`**
+
+```bash
+$ composer create-project laravel/laravel:^8.0 <app-name>
+```
+
+**Cài đặt thông qua Laravel installer:**
+
+Một trong những cách mình ưa thích hơn chính là sử dụng Laravel Installer, vì cấu trúc của nó nhanh gọn hơn.
+
+```bash
+$ composer global require laravel/installer
+```
+
+Về sau, khi bạn cần tạo mới một project bạn chỉ cần chạy lênh:
+
+```bash
+$ laravel new <app-name>
+```
+
+### Khởi chạy ứng dụng Laravel 8
+
+Để bắt đầu chạy ứng dụng, bạn cần `cd` vào thư mục dự án bạn vừa tạo và chạy lên bằng lệnh `serve`
+
+```bash
+$ cd example-app
+
+$ php artisan serve
+```
+
+Mặc định Laravel sẽ được chạy với cổng 8000, bạn có thể truy cập thông qua đường link [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+## Cài đặt Laravel các phiên bản khác:
+
+Để cài đặt các phiên bản Laravel được theo ý muốn, bạn có thể thêm số phiên bản vào câu lệnh khởi tạo là được nhé!
+
+### Cài đặt Laravel 6
+
+```bash
+$ composer create-project laravel/laravel:^6.0 <app-name>
+```
+
+### Cài đặt Laravel 7
+
+```bash
+$ composer create-project laravel/laravel:^7.0 <app-name>
+```
