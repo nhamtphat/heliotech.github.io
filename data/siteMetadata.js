@@ -2,7 +2,7 @@ const siteMetadata = {
   title: 'Helio Tech',
   author: 'Phat Nham',
   headerTitle: 'Helio Tech',
-  description: 'A blog for Laravel developers',
+  description: 'Một trang web hướng dẫn mọi thứ về Laravel, hướng dẫn dễ hiểu nhất với tất cả mọi người',
   language: 'vi-vn',
   siteUrl: 'https://heliotech.me',
   siteRepo: 'https://github.com/nhamtphat/heliotech-blog',
