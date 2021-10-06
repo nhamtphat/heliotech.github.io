@@ -2,7 +2,8 @@ const siteMetadata = {
   title: 'Helio Tech',
   author: 'Phat Nham',
   headerTitle: 'Helio Tech',
-  description: 'Một trang web hướng dẫn mọi thứ về Laravel, hướng dẫn dễ hiểu nhất với tất cả mọi người',
+  description:
+    'Một trang web hướng dẫn mọi thứ về Laravel, hướng dẫn dễ hiểu nhất với tất cả mọi người',
   language: 'vi-vn',
   siteUrl: 'https://heliotech.me',
   siteRepo: 'https://github.com/nhamtphat/heliotech-blog',
@@ -24,7 +25,7 @@ const siteMetadata = {
   newsletter: {
     // supports mailchimp, buttondown, convertkit
     // Please add your .env file and modify it according to your selection
-    provider: 'buttondown',
+    provider: 'mailchimp',
   },
   comment: {
     // Select a provider and use the environment variables associated to it
