@@ -6,8 +6,8 @@ const stickyPosts = [
     href: '/blog/laravel-roadmap',
   },
   {
-    title: 'Chuỗi bài viết Laravel căn bản',
-    description: `Bập bẹ làm quen với Laravel, hãy bắt đầu cùng mình khám phá framework tuyệt vời này nhé, bạn có thể xem lộ trình bên kia, hoặc bắt đầu luôn tại đây.`,
+    title: 'Học Laravel căn bản',
+    description: `Mới làm quen với Laravel, hãy cùng mình bắt đầu hành trình khám phá framework tuyệt vời này nhé, bạn có thể xem lộ trình bên kia, hoặc bắt đầu luôn tại đây.`,
     imgSrc: '/posts/laravel-basic/laravel-basic.png',
     href: '/blog/guide-install-laravel-8',
   },
