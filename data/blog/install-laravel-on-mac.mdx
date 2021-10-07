@@ -9,25 +9,32 @@ layout: PostSimple
 ---
 
 ## Giới thiệu
+
 <TOCInline toc={props.toc} exclude="Giới thiệu" toHeading={2} />
 
 ## Laravel là gì?
+
 Trước khi đọc bài viết này, có lẽ các bạn cũng đã biết Laravel là một trong những framework nổi tiếng nhất của ngon ngữ PHP
 Laravel không chỉ dừng lại ở một framework thông thường mà còn đi kèm với một hệ sinh thái các sản phẩm độc đáo dành cho developer, ví dụ như Laravel Sail (môi trường phát triển Laravel cùng với Docker), Laravel Valet (môi trường phát triển cho Macs), Laravel Forge (quản lý server), Laravel Echo (xử lý sự kiện realtime) và một micro-framework dựa trên Laravel - Laravel Lumen.
+
 ## Server Requirements
+
 Laravel framework cũng có một số yêu cầu tối thiểu khi cài đặt. Những extension dưới đây có sẵn hoặc rất dễ cài đặt ở hầu hết các máy chủ và hosting. Tuy nhiên bạn nên kiểm tra server của mình có thể đáp ứng những yêu cầu này không nhé:
 _Đối với Laravel phiên bản 8.0 trở lên_
--   PHP >= 7.3
--   BCMath PHP Extension
--   Ctype PHP Extension
--   Fileinfo PHP Extension
--   JSON PHP Extension
--   Mbstring PHP Extension
--   OpenSSL PHP Extension
--   PDO PHP Extension
--   Tokenizer PHP Extension
--   XML PHP Extension
+
+- PHP >= 7.3
+- BCMath PHP Extension
+- Ctype PHP Extension
+- Fileinfo PHP Extension
+- JSON PHP Extension
+- Mbstring PHP Extension
+- OpenSSL PHP Extension
+- PDO PHP Extension
+- Tokenizer PHP Extension
+- XML PHP Extension
+
 ## Cài đặt trên máy MacOS
+
 Để cài đặt Laravel một cách dễ dàng nhất trên máy MacOS, bạn có thể cài đặt và sử dụng môi trường phát triển dựa trên Docker thông qua [Laravel Sail](https://laravel.com/docs/8.x/sail)
 
 **Bước 1. Cài đặt Docker Desktop trên máy của bạn.**
@@ -37,17 +44,23 @@ Bạn hãy tải về [Docker Desktop](https://www.docker.com/products/docker-de
 **Bước 2. Khởi tạo dự án án với lệnh:**
 
 Bạn có thể thay thế tên miền dự án bất kỳ vào url bên trên, trang web sẽ tự động build cho bạn một script khởi tạo dự án tương ứng.
+
 ```bash
 curl -s "https://laravel.build/<your-app-name>" | bash
 # Ví dụ:
 curl -s "https://laravel.build/example-app" | bash
 ```
+
 Sau khi khởi tạo xong, hãy `cd` vào thư mục dự án và bắt đầu chạy Laravel Sail lên:
+
 ```bash
 cd example-app
 
 ./vendor/bin/sail up
 ```
+
 Lần đầu chay, Sail sẽ cần khởi tạo container vì vậy sẽ mất một vài phút. Đừng lo lắng, những lần chạy sau đó sẽ không tốn nhiều thời gian của các bạn đâu.
 Sau khi đã chạy, bạn đã có thể truy cập ứng dụng của mình trên trình duyệt tại đường dẫn: http://localhost
 Chúc các bạn thành công!
+
+Đọc tiếp: [Cấu hình cơ sở dữ liệu MySQL với Laravel](/blog/connect-laravel-with-mysql)

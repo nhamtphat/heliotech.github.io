@@ -1,0 +1,118 @@
+---
+title: 'Cấu hình cơ sở dữ liệu MySQL với Laravel'
+date: 2021-10-08T01:00:00Z
+lastmod: '2021-10-08'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Hướng dẫn tạo và cấu hình cơ sở dữ liệu MySQL với ứng dụng Laravel. Và một mẹo nhỏ để kiểm tra kết nối đã thành công hay chưa mà không làm ảnh hưởng đến CSDL'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={2} />
+
+## Đặt vấn đề
+
+Trong một dự án ứng dụng, cơ sở dữ liệu là một trong những thành phần thiết yếu và quan trọng, sau khi bạn đã [cài đặt Laravel](/blog/guide-install-laravel-8) thành công. Công việc tiếp theo của bạn là tạo CSDL và kết nối với Laravel.
+
+Laravel hỗ trợ rất nhiều hệ quản trị cơ sở dữ liệu cho bạn tha hồ lựa chọn, cụ thể ta có:
+
+- MySQL 5.7 trở lên
+- PostgreSQL 9.6 trở lên
+- SQLite 3.8.8 trở lên
+- SQL Server 2017 trở lên
+
+Trong đó, được ưa chuộng hơn cả là MySQL và PostgreSQL, trong bài viết này mình sẽ hướng dẫn các bạn tạo và kết nối cơ sở dữ liệu với MySQL (MariaDB) còn đối với PostgreSQL bạn hãy xem bài viết Cấu hình Laravel với PostgreSQL
+
+## Tạo cơ sở dữ liệu thông qua SQL
+
+Để tạo cơ sở bạn có nhiều cách, một trong những cách nhanh nhất là tạo thông qua CLI.
+
+Đầu tiên, đăng nhập vào cli bằng lệnh
+
+```sql
+$ mysql -u root -p
+Enter password: *********
+```
+
+Tiếp theo, hãy dùng lệnh `CREATE DATABASE <app_name>;` thay `<app_name>` thành tên CSDL mà bạn muốn tạo, ví dụ:
+
+```sql
+mysql> CREATE DATABASE laravel_app;
+Query OK, 1 row affected (0.00 sec)
+```
+
+## Tạo cơ sở dữ liệu thông qua phpMyAdmin
+
+Bạn cũng có thể tạo CSDL trong phpMyAdmin - một trình quản trị MySQL được viết bằng PHP thường có sẵn trong Xampp hay Laragon.
+
+Truy cập đường dẫn [http://localhost/phpmyadmin](http://localhost/phpmyadmin) Đăng nhập vào bằng username và password
+
+![Untitled](/posts/connect-laravel-with-mysql/1.png)
+
+Ở bên thanh sidebar bên trái, chọn vào _New:_
+
+![Untitled](/posts/connect-laravel-with-mysql/2.png)
+
+Sau đó nhập tên CSDL, chọn bảng mã (hãy chọn unicode để lưu tiếng việt không bị lỗi) và ấn _Create._
+
+![Untitled](/posts/connect-laravel-with-mysql/3.png)
+
+## Cấu hình env trong Laravel
+
+Bạn hãy copy file `.env.example` trong thư mục project ra và đổi tên thành `.env` sau đó chỉnh sửa nội dung như sau:
+
+```env {4-6} showLineNumbers
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel_app
+DB_USERNAME=root
+DB_PASSWORD=yourpassword
+```
+
+Ở ba dòng được tô đậm, bạn hãy đổi thành nội dung tương ứng của bạn.
+
+## Kiểm tra kết nối
+
+Có nhiều cách để kiểm tra kết nối, tuy nhiên cách nhanh nhất là sử dụng Laravel Tinker
+
+**Khởi động Tinker:**
+
+```bash
+$ php artisan tinker
+```
+
+Sau đó tiếp tục dùng lệnh `DB::connection()->getPdo();`
+
+**Nếu kết nối thất bại:**
+
+```
+PDOException with message 'SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+```
+
+**Nếu kết nối thành công:**
+
+```
+=> PDO {#4482
+     inTransaction: false,
+     attributes: {
+       CASE: NATURAL,
+       ERRMODE: EXCEPTION,
+       AUTOCOMMIT: 1,
+       PERSISTENT: false,
+       DRIVER_NAME: "mysql",
+       SERVER_INFO: "Uptime: 61476  Threads: 2  Questions: 3577  Slow queries: 0  Opens: 254  Flush tables: 1  Open tables: 130  Queries per second avg: 0.058",
+       ORACLE_NULLS: NATURAL,
+       CLIENT_VERSION: "mysqlnd 7.4.19",
+       SERVER_VERSION: "5.7.33",
+       STATEMENT_CLASS: [
+         "PDOStatement",
+       ],
+       EMULATE_PREPARES: 0,
+       CONNECTION_STATUS: "127.0.0.12 via TCP/IP",
+       DEFAULT_FETCH_MODE: BOTH,
+     },
+   }
+```
