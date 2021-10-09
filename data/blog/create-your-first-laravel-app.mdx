@@ -1,0 +1,177 @@
+---
+title: 'Xây dựng ứng dụng Laravel đầu tiên của bạn'
+date: 2021-10-10T00:30:00Z
+lastmod: '2021-10-10'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Lập trình ứng dụng Kimi no Na wa đơn giản trên Laravel, làm quen với Route - Controller và View để có cái nhìn tổng quát về luồng xử lý của ứng dụng.'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={2} />
+
+## Đặt vấn đề
+
+Không gì bắt đầu một ngôn ngữ mới tốt bằng cách thực hành một ứng dụng Hello World, nhưng như vậy thì quá đơn giản, hôm nay chính ta sẽ cùng nhau làm một ứng dụng **Kimi no Na wa** - mình đặt tên theo bộ phim Your name (2016), hay còn biết với cái tên **Tên bạn là gì?**
+
+### Ứng dụng này sẽ làm gì?
+
+- **Trang chủ**: Hiển thị một form cho phép bạn điền tên mình vào.
+- **Trang chào**: Hiển thị "Xin chào tên bạn" với cái tên bạn nhập vào.
+
+### Tại sao không làm Hello World đi?
+
+Đối với hướng dẫn Hello World trên Laravel bạn sẽ tìm ra rất nhiều bài viết trên mạng rồi, vì vậy mình muốn chúng ta sẽ đi sâu hơn một chút, có chút gì đó thử thách sẽ làm bạn lý thú hơn.
+
+## Tạo project Laravel
+
+Nếu bạn nào chưa biết, thì có thể xem lại [hướng dẫn chi tiết cách cài đặt Laravel](/blog/guide-install-laravel-8), đơn giản cho bạn nào quên chúng ta sẽ chạy lệnh:
+
+```bash
+$ composer create-project --prefer-dist laravel/laravel yourname
+
+Hoặc với Laravel new:
+$ laravel new yourname
+
+Chuyển vào thư mục project:
+$ cd yourname
+```
+
+**Cấu hình biến môi trường** `.env`
+
+Nếu bạn tạo bằng `composer` hay `laravel new`, ứng dụng sẽ tự động tạo ra cho bạn một file `.env` trong thư mục project, nếu chưa có, hãy copy `.env.example` và đổi tên thành `.env`
+
+```bash
+$ cp .env.example .env
+```
+
+**Tạo khoá ứng dụng (APP_KEY):**
+
+```bash
+$ php artisan key:generate
+```
+
+**Chạy ứng dụng Laravel:**
+
+```bash
+$ php artisan serve
+```
+
+## Tạo route hiển thị form và xử lý dữ liệu
+
+Trong Laravel, Route có vai trò điều hướng theo địa chỉ URL mà người dùng cung cấp. Bạn hãy mở file `routes/web.php` lên và thêm vào 2 dòng:
+
+```php {10-11} showLineNumbers
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\YournameController;
+...
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/', [YournameController::class, 'form']);
+Route::post('/say-hello', [YournameController::class, 'sayHello']);
+```
+
+Giải thích một chút, khi khai báo route ta cần chú ý đến 4 tham số:
+
+- `get` hay `post` : Đây chính là HTTP method
+- `'/'` hay `'say-hello'` : Đường link bắt đầu từ trang chủ.
+- `YournameController::class` : Tên **controller** sẽ xử lý
+- `form` hay `sayHello` : Tên **action** (hay hàm) sẽ xử lý, trong **controller** sẽ có nhiều **action**
+
+Cụ thể hơn, ví dụ trang web của bạn là yourname.co, với dòng X thì đường link có nghĩa là khi người dùng truy cập vào đường link yourname.com/say-hello với phương thức POST thì sẽ chạy action `sayHello()` trong controller `YournameController`
+
+## Tạo Controller xử lý trong Laravel
+
+Như bạn thấy ở trên, `YournameController` sẽ nằm trong thư mục `App\Http\Controllers` cách đơn giản nhất để tạo một Controller là sử dụng `artisan`
+
+```bash
+$ php artisan make:controller YournameController
+```
+
+Sau khi chạy lệnh, bạn mở file `YournameController.php` ở thư mục `app/Http/Controllers/` bây giờ bạn cần khai báo 2 action như ở trên route đã khai báo:
+
+```php {9-12,14-17} showLineNumbers
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class YournameController extends Controller
+{
+    public function form()
+    {
+        // Hiển thị form
+    }
+
+    public function sayHello()
+    {
+        // Hiển thị tên đã nhập vào
+    }
+}
+
+```
+
+## Tạo view và hiển thị view trong Laravel
+
+Bây giờ trước tiên ta sẽ tạo một View tên là `form.blade.php` trong thư mục `resources/views/` nội dung file form sẽ như sau:
+
+```html showLineNumbers
+<form action="/say-hello" method="post">
+  @csrf
+  <input type="text" name="input_name" placeholder="Nhập tên" />
+  <button type="submit">OK</button>
+</form>
+```
+
+Như bạn thấy, thuộc tính `action=` trong form sẽ chuyển sang `/say-hello` để xử lý với method là **POST**. Một điểm đặc biệt của Laravel, bạn sẽ phải thêm `@csrf` vào trong form để Laravel tạo một token chống tấn công CSRF.
+
+Để hiển thị view này, ta sẽ cho action `form()` trả về view:-
+
+```php {3} showLineNumbers
+public function form()
+{
+    return view('form');
+}
+```
+
+Ok bây giờ hãy mở trình duyệt lên và thử truy cập [http://127.0.0.1:8000](http://127.0.0.1:8000/) bạn sẽ thấy form để nhập tên vào rồi đấy.
+
+## Xử lý dữ liệu từ form trong Laravel
+
+Bây giờ ở action `sayHello()` chúng ta sẽ lấy tên người dùng nhập lên và truyền vào và hiển thị nó ra một view khác.
+
+```php {3-5} showLineNumbers
+public function sayHello(Request $request)
+{
+    $view_data['display_name'] = $request->input_name;
+
+    return view('hello', $view_data);
+}
+```
+
+Với tất cả các biến truyền lên từ form, ta có thể dễ dàng lấy được từ biến `$request`
+
+Như bạn thấy sau khi lấy được `input_name` từ form, mình sẽ truyền qua view bằng cách thêm nó vào mảng. Trong thư mục `resources/views/` ta tạo file `hello.blade.php` với nội dung như sau:
+
+```php showLineNumbers
+Xin chào {{ $display_name }}
+```
+
+## Tổng hợp kiến thức
+
+Như vậy là bạn đã đi qua toàn bộ một luồng ứng dụng trong Laravel:
+
+1. Route `routes/web.php` Khai báo hai đường dẫn `/` và `/say-hello`
+2. Controller `YournameController.php` có 2 **action** xử lý và trả về 2 **view** khác nhau
+3. View `form.blade.php` và `hello.blade.php` hiển thị nội dung
+
+Nếu bạn có thắc mắc gì, hãy để lại bình luận bên dưới, mình rất vui nếu các bạn đặt câu hỏi đấy!
+
+<BlogNewsletterForm title="Nếu bạn thích những bài thế này?" />
