@@ -1,0 +1,137 @@
+---
+title: 'Hướng dẫn setup Github action cho Laravel '
+date: 2021-10-11T02:30:00Z
+lastmod: '2021-10-11'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Cách đơn giản để setup Github Action tự động làm các công việc  chạy unit test, kiểm tra code style hay thậm chí deploy sản phẩm tự động khi bạn push code lên Github.'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Github Action là gì?
+
+GitHub Actions là một tính năng của Github cho phép bạn chạy những dòng lệnh được đặt trước vào một thời điểm nào đó (ví dụ push hay PR), mục đích thường là để chạy unit test, kiểm tra code style hay thậm chí deploy sản phẩm tự động.
+
+Trong bài viết này mình sẽ hướng dẫn cách đơn giản để setup một workflow (cái mình vừa nói ở trên) khi có ai đó push lên code lên repo nhé.
+
+Trong bài viết này mình sẽ dùng các docker container của từ repo [https://github.com/kirschbaum-development/laravel-test-runner-container](https://github.com/kirschbaum-development/laravel-test-runner-container)
+
+## Cài đặt Github Action để tự động chạy phpunit
+
+### Tạo script workflow
+
+Đầu tiên bạn cần tạo ra một file cấu hình trong thư mục dự án, hãy tạo file `.github/workflows/ci.yml` với nội dung như sau:
+
+```yaml {7,9-17} showLineNumbers
+on: push
+name: CI
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    container:
+      image: kirschbaumdevelopment/laravel-test-runner:7.3
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: test
+        ports:
+          - 33306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Install composer dependencies
+        run: |
+          composer install --no-scripts
+
+      - name: Prepare Laravel Application
+        run: |
+          cp .env.ci .env
+          php artisan key:generate
+          php artisan migrate:fresh --seed
+
+      - name: Run Testsuite
+        run: vendor/bin/phpunit tests/
+```
+
+Tuỳ theo phiên bản PHP của bạn, hãy chọn container image phù hợp:
+
+- PHP 8.0: **`kirschbaumdevelopment/laravel-test-runner:8.0`**
+- PHP 7.4: **`kirschbaumdevelopment/laravel-test-runner:7.4`**
+- PHP 7.3: **`kirschbaumdevelopment/laravel-test-runner:7.3`**
+- PHP 7.2: **`kirschbaumdevelopment/laravel-test-runner:7.2`**
+
+### Cấu hình biến môi trường
+
+Tiếp theo bạn cần tạo một file cấu hình biến môi trường, hãy copy file `.env.example` ra một file mới và đặt tên là `.env.ci`. Trong file này bạn chỉ cần chú ý đến chỗ cài đặt các biến CSDL, đối với các bạn chạy [MySQL](https://heliotech.me/blog/connect-laravel-with-mysql) thì hãy đổi lại như sau:
+
+```{} showLineNumbers
+# database
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=test
+DB_USERNAME=root
+DB_PASSWORD=password
+```
+
+Rồi bây giờ hãy commit lại và push lên Github xem nào. Nếu bạn workflow của bạn hoạt động, bạn sẽ thấy một dấu chấm tròn bên cạnh thời gian commit cuối cùng.
+
+### Xem kết quả chạy workflow
+
+Màu vàng 🟡 là đang chạy, mày xanh 🟢 là thành công toàn bộ. Và tất nhiên, màu đỏ 🔴 thì có gì đó đã failed hãy kiểm tra lại.
+
+![Untitled](/posts/setup-github-action-for-unittest/1.png)
+
+## Cấu hình Github Action sử dụng PostgreSQL
+
+Nếu dự án của bạn đang chạy PostgreSQL thay vì MySQL như ở trên, bạn hãy thay service trong file `ci.yml` lại như sau:
+
+```yaml showLineNumbers
+services:
+  postgres:
+    image: postgres:10.8
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test
+    ports:
+      - 5432:5432
+    options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+```
+
+Còn đây là nội dung cấu hình biến môi trường trong file `.env.ci`
+
+```{} showLineNumbers
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=test
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+```
+
+## Cấu hình Github Action sử dụng SQLite
+
+SQLite rất cấu hình rát đơn giản, bạn hãy xoá luôn `services` bên trong file cấu hình workflow, và sửa nội dung `.env.ci` như sau:
+
+```{} showLineNumbers
+DB_CONNECTION=sqlite
+DB_DATABASE=:memory:
+```
+
+Nếu bạn thích những bài viết như thế này, hãy đăng ký nhận email hàng tuần, mình sẽ tổng hợp các bài viết hay trong tuần và gửi email thông báo đến các bạn:
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
+
+Tham khảo: [Laravel Github Actions](https://laravel-news.com/laravel-github-actions)
