@@ -9,9 +9,11 @@ layout: PostSimple
 ---
 
 ## Mục lục
+
 <TOCInline toc={props.toc} exclude="Mục lục" toHeading={2} />
 
 ## Giới thiệu Laravel Debugbar
+
 Một trong những việc thường làm nhất khi phát triển một ứng dụng đó chính là debug. Có phải khi bạn code một tuồng từ A-z của một tính năng và run lần đầu và ... bùm, NÓ CHẠY!! Và điều đó còn đáng sợ hơn là nó không chạy nên vì vậy chúng ta có các [công cụ hỗ trợ debug](/blog/dump-dd-ddd) khi lập trình.
 
 Hôm nay mình sẽ giới thiệu đến các bạn một công cụ miễn phí và rất hay ho, đó chính là package Laravel Debugbar
@@ -21,29 +23,37 @@ Link github: https://github.com/barryvdh/laravel-debugbar
 Phiên bản dành cho PHP: http://phpdebugbar.com/
 
 Các tính năng của Debugbar:
- - Giao diện thông tin trực quan
- - Dễ dàng tích hợp vào dự án
- - Hiện thị các thông tin về: Message, Timeline, Exception, View, Route, Query, Request, ...
- - Có thể xử lý cả những request thông qua AJAX, React, ...
+
+- Giao diện thông tin trực quan
+- Dễ dàng tích hợp vào dự án
+- Hiện thị các thông tin về: Message, Timeline, Exception, View, Route, Query, Request, ...
+- Có thể xử lý cả những request thông qua AJAX, React, ...
 
 ## Hướng dẫn cài đặt Laravel Debugbar
+
 Để cài đặt Laravel trên Laravel, bạn chỉ cần một lệnh:
+
 ```bash
 $ composer require barryvdh/laravel-debugbar --dev
 ```
+
 Và lưu ý, bạn cần bật `APP_DEBUG` là `true` trong file `.env` để debugbar có thể chạy được nhé.
 
 ## Hướng dẫn cài đặt Debugbar trên Lumen
+
 Để cài đặt trên Lumen, bạn cần đăng ký Provider trong file `bootstrap/app.php`:
+
 ```php
 if (env('APP_DEBUG')) {
     $app->register(Barryvdh\Debugbar\LumenServiceProvider::class);
 }
 ```
+
 ## Hướng dẫn sử dụng Laravel Debugbar
+
 Sau khi đã bật `APP_DEBUG` là `true` trong file `.env` debugbar sẽ tự động hiển thị ở trang web của bạn. Nó giống Dev tools của Chrome vậy, bạn chuyển giữa các tab để xem những thông tin mà mình cần.
 
-![](/posts/laravel-debugbar/laravel-debugbar.png)
+<S3Image src="/posts/laravel-debugbar/laravel-debugbar.png" />
 
 Mình chưa nghĩ ra được cái gì để hướng dẫn về nó, mọi thứ đều được sắp xếp một cách khoa học và dễ dàng cho việc debug. Nếu bạn đang thắc mắc điều gì, đừng ngại để lại bình luận, mình sẽ viết một bài về nó.
 
