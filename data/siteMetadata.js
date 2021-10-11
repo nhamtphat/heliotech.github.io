@@ -7,6 +7,7 @@ const siteMetadata = {
   language: 'vi-vn',
   siteUrl: 'https://heliotech.me',
   siteRepo: 'https://github.com/nhamtphat/heliotech-blog',
+  s3BucketUrl: 'https://heliotech-public.s3.ap-southeast-1.amazonaws.com',
   siteLogo: '/static/images/logo.png',
   image: '/static/images/avatar.png',
   socialBanner: '/static/images/social-banner.png',
