@@ -24,14 +24,14 @@ const NewsletterForm = ({ title = 'Đăng ký nhận thông báo' }) => {
     const { error } = await res.json()
     if (error) {
       setError(true)
-      setMessage('Your e-mail adress is invalid or you are already subscribed!')
+      setMessage('Email của bạn không đúng, hoặc bạn đã đăng ký từ trước!')
       return
     }
 
     inputEl.current.value = ''
     setError(false)
     setSubscribed(true)
-    setMessage('Successfully! 🎉 You are now subscribed.')
+    setMessage('Đăng ký thành công !  🎉')
   }
 
   return (
