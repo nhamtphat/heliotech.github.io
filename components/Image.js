@@ -12,5 +12,5 @@ export const S3Image = ({ ...rest }) => {
     src: siteMetadata.s3BucketUrl + rest.src,
   }
 
-  return <img {...new_rest} style="max-width:100%; height:auto" />
+  return <img {...new_rest} style={{ maxWidth: '100%', height: 'auto' }} />
 }
