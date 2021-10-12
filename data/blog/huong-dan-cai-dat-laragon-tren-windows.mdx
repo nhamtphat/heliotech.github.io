@@ -1,0 +1,70 @@
+---
+title: 'Hướng dẫn cài đặt Laragon 5 trên Windows'
+date: 2021-10-12T14:00:00Z
+lastmod: '2021-10-12'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Laragon xứng đáng là phần mềm quản lý môi trường phát triển PHP tốt nhất trên Windows với hàng hoạt tính năng tiện lợi như đổi phiên bản PHP, tự tạo virtual host, ...'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Giới thiệu
+
+Nếu bạn đã quá quen với Xampp, và cảm thấy thật phiền phức pkhi cần tạo Virtual host hay điều chỉnh các ext trên xampp thì Laragon là cứu cánh cho bạn.
+
+Laragon cung cấp cho bạn môi trường phát triển ứng dụng WAMP (Windows-Apache-MySQL-PHP) vô cùng tiện lợi với bản điều khiển tiện lợi bao gồm:
+
+- Chuyển đổi nhanh giữa các phiên bản PHP
+- Tự động tạo virtualhost và tên miền theo tenthumuc.test (có thể đổi đuôi tuỳ thích)
+- Bật tắt nhanh các PHP extension, cấu hình php.ini dễ dàng
+- Tạo nhanh CSDL ngay trên app
+- Khởi tạo nhanh các app: Laravel, Symfony, Wordpress, ...
+- Hỗ trợ cả Node.js
+
+## Hướng dẫn cài đặt Laragon 5 trên Windows 10
+
+Truy cập vào trang chủ Laragon và tải về phiên bản Largon mới nhất:
+
+> [https://laragon.org/download/index.html](https://laragon.org/download/index.html)
+
+Bạn hãy ấn Next và cài đặt như những ứng dụng thông thường, lưu ý ở bước cấu hình dưới đây:
+
+<S3Image src="/posts/huong-dan-cai-dat-laragon-tren-windows/1.png" />
+
+- **Run Laragon when Windows starts**: Tự khởi động Laragon khi khởi động Windows
+- **Auto virtual hosts**: Tự động tạo virtualhost và tên miền theo thư mục
+- **Add Notepad++ & Terminal to Right-Click Menu**: Cái này sẽ tự động thêm 2 dòng **Open with Notepad++** và **Open Terminal here** khi bạn click chuột phải vào file hay thư mục nào đó.
+
+Bạn hãy chọn những gì mà bạn cần, sau đó tiếp tục ấn **Next** cho tới khi hoàn tất.
+
+Khởi động lại máy để hoàn tất hoá trình cài đặt:
+
+## Cài đặt phpMyAdmin vào Laragon
+
+Mặt định thì Largon không có sẵn phpMyAdmin, tuy nhiên việc thêm vào cũng không khó khăn gì cả. Bạn hãy tải về phpMyAdmin tại đây:
+
+> [https://www.phpmyadmin.net/downloads/](https://www.phpmyadmin.net/downloads/)
+
+Sau khi tải về, hãy giải nén thư mục `phpMyAdmin-5.1.1-all-languages` bên trong file nén vào thư mục `C:\laragon\etc\apps` và đổi tên thư mục đó thành `phpMyAdmin`
+
+<S3Image src="/posts/huong-dan-cai-dat-laragon-tren-windows/2.png" />
+
+Vậy là xong, bạn đã có thể truy cập vào [http://localhost/phpmyadmin](http://localhost/phpmyadmin) đăng nhập với tên tài khoản `root` và **_bỏ trống ô mật khẩu_**
+
+## Tạo virtual host trên Laragon 5
+
+Để tạo virtual host trên Laragon, bạn chỉ cần tạo một thư mục bên trong thư mục `C:\laragon\www` như thế này, tên trang web sẽ là `tenthumuc.test`
+
+<S3Image src="/posts/huong-dan-cai-dat-laragon-tren-windows/3.png" />
+
+Nếu bạn muốn thay đổi đuôi tên miền, hãy **chuột phải vào Laragon Panel** và chọn **Preferences**
+
+## Tổng kết
+
+Sau quá trình chuyển từ Xampp qua Laragon, mình không có gì phải phàn nàn cả, mọi thứ đều rất đơn giản. Tuy nhiên những thứ tiện lợi như vậy sẽ không cho bạn cơ hội được cấu hình thủ công trên những môi trường thực tế.
+
+<BlogNewsletterForm title="Nếu bạn thích những bài thế này?" />
