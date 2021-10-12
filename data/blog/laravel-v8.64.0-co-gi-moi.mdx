@@ -1,0 +1,38 @@
+---
+title: 'Chi tiết bản cập nhật Laravel 8 - Laravel v8.64.0 có gì mới?'
+date: 2021-10-13T02:00:00Z
+lastmod: '2021-10-13'
+tags: ['laravel', 'news']
+draft: false
+summary: 'Xem chi tiết những thay đổi trong bản cập nhật v8.64.0 có gì mới?'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Tính năng mới
+
+- Thêm hàm `reduceMany` vào `Collections` ([#39078](https://github.com/laravel/framework/pull/39078))
+- Thêm `Illuminate/Support/Stringable::stripTags()` ([#39098](https://github.com/laravel/framework/pull/39098))
+- Thêm `Illuminate/Console/OutputStyle::getOutput()` ([#39099](https://github.com/laravel/framework/pull/39099))
+- Thêm `lang_path` vào hàm helper ([#39103](https://github.com/laravel/framework/pull/39103))
+- Thêm `@aware` vào blade ([#39100](https://github.com/laravel/framework/pull/39100))
+- New JobRetrying event dispatched ([#39097](https://github.com/laravel/framework/pull/39097))
+- Thêm hàm `throwIf` trong Client Response ([#39148](https://github.com/laravel/framework/pull/39148))
+- Thêm `Illuminate/Collections/Collection::hasAny()` ([#39155](https://github.com/laravel/framework/pull/39155))
+
+## Sửa lỗi
+
+- Sửa lỗi `Route::group` không có prefix trên PHP 8.1 ([#39115](https://github.com/laravel/framework/pull/39115))
+- Sửa lỗi nhận dạng Bearer token trong InteractsWithInput ([#39150](https://github.com/laravel/framework/pull/39150))
+
+## Thay đổi khác
+
+- Refactoring `Illuminate/Log/LogManager::prepareHandler()` ([#39093](https://github.com/laravel/framework/pull/39093))
+- Xoá **component state** sau khi đã render View ([04fc7c2](https://github.com/laravel/framework/commit/04fc7c2f87372511b0f77e539bc0e2e3357ec200))
+- Thêm tham số `--no-tablespaces` khi dump dữ liệu ([#39126](https://github.com/laravel/framework/pull/39126))
+- Bỏ timeout trong SchemaState Process ([#39139](https://github.com/laravel/framework/pull/39139))
+
+<BlogNewsletterForm title="Cập nhật tin tức mới nhất từ Laravel?" />
