@@ -1,0 +1,119 @@
+---
+title: 'Tiết kiệm thời gian khi thêm/sửa model với Mass Assignment'
+date: 2021-10-16T17:00:00Z
+lastmod: '2021-10-16'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Một trong những tính năng tiện lợi giúp các bạn tiết kiệm nhiều thời gian khi thêm/sửa model trong Laravel'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Sử dụng Mass Assignment để thêm/sửa
+
+Thông thường, khi tạo một model mới các bạn thường sẽ set từng thuộc tính của model, sau đó sử dụng phương thức `save()` để lưu model đó lại trên CSDL:
+
+Ví dụ ta có model `Post` như sau:
+
+```php {} showLineNumbers
+public function store(Request $request)
+{
+		$data = $request->validate(...);
+
+		$post = new Post();
+		$post->title = $data['title'];
+		$post->content = $data['content'];
+		$post->author_id = $data['author_id'];
+		$post->save();;
+
+		return $post;
+}
+```
+
+## Tạo một model với Mass assignment
+
+Để sử dụng Mass assignment đầu tiên bạn cần khai báo những thuộc tính nào được phép cập nhật bên trong model `Post`. Biến `$fillable` chính là những thuộc tính nào mà các bạn muốn Laravel cho phép cập nhật thông qua Mass assignment:
+
+```php {3-7} showLineNumbers
+class Post extends Model
+{
+		protected $fillable = [
+        'title',
+        'content',
+        'author_id',
+    ];
+}
+```
+
+Bây giờ trong controller bạn chỉ cần khai báo những trường dữ liệu nào được phép gán và sử dụng lệnh tạo giống như thế này:
+
+```php {5} showLineNumbers
+public function store(Request $request)
+{
+		$data = $request->validate(...);
+
+		$post = Post::create($data);
+
+		return $post;
+}
+```
+
+## Sửa một model với Mass assignment
+
+Tương tự khi sửa, bạn chỉ cần gọi phương thức `update()` và truyền một mảng dữ liệu vào:
+
+```php {6} showLineNumbers
+public function update(Request $request, $post_id)
+{
+		$data = $request->validate(...);
+		$post = Post::findOrFail($post_id);
+
+		$post->update($data);
+
+		return $post;
+}
+```
+
+## Tạo model thông qua một Relationship
+
+Đôi khi bạn sẽ cần tạo ra một bài viết cho một `User` chẳng hạn, thì bạn chỉ cần trỏ tới relationship của nó rồi sau đó gọi hàm `create()`
+
+```php {6} showLineNumbers
+public function store(Request $request, $user_id)
+{
+		$data = $request->validate(...);
+		$user = User::findOrFail($user_id);
+
+		$post = $user->posts()->create($data);
+
+		return $post;
+}
+```
+
+## Những vấn đề cần lưu ý khi sử dụng Mass Assignment
+
+### Không validate dữ liệu nhập vào:
+
+Ở ví dụ ở trên, phương thức `$request->all()` sẽ cho phép người dùng cập nhật tất cả những trường mà người dùng nhập vào, trong nhiều trường hợp, người dùng sẽ cập nhật luôn cả những thuộc tính không cho phép cập nhật qua form (ví dụ email) vì vậy bạn cần validate dữ liệu trước khi sử dụng Mass assignment nhé:
+
+```php {} showLineNumbers
+public function store(Request $request)
+{
+		$data = $request->validate([
+				'title' => 'required|string',
+				'content' => 'required|string',
+				'author_id' => 'required',
+		]);
+
+		$post = Post::create($data);
+
+		return $post;
+}
+```
+
+Nếu bạn thích những bài viết như thế này, hãy đăng ký nhận email hàng tuần, mình sẽ tổng hợp các bài viết hay trong tuần và gửi email thông báo đến các bạn:
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
