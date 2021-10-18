@@ -1,0 +1,271 @@
+---
+title: 'Xây dựng chatbox với Laravel Livewire phần 1'
+date: 2021-10-19T01:00:00Z
+lastmod: '2021-10-19'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Xây dựng một ứng dụng chat thời gian thực (realtime chat box) đơn giản với Livewire và Pusher'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+Chào các bạn, mình vừa tìm hiểu về một công nghệ rất thú vị và có tính ứng dụng cao, đó chính là Livewire. Trên trang chủ của Livewire nó được giới thiệu như là một full-stack framework cho Laravel, nó giúp cho việc xây dựng giao diện tương tác với hệ thống một cách dễ dàng tự động sinh ra các API và các JS theo nhu cầu của người dùng.
+
+Trong chuỗi bài viết này mình sẽ hướng dẫn các bạn từng bước để làm một phòng chat bằng cách sử dụng Laravel Livewire kết hợp với Pusher (dịch vụ socketio).
+
+## Tạo project Laravel và các package cần thiết
+
+Đầu tiên bạn cần tạo một project Laravel bằng lệnh:
+
+```php
+$ laravel new laravel-chat
+```
+
+Nó sẽ tạo cho bạn một project mới với cái tên **laravel-chat** bên trong thư mục mà bạn chạy lệnh này. Tiếp theo hãy cấu hình CSDL cho Laravel thường hướng dẫn này:
+
+> [Cấu hình cơ sở dữ liệu MySQL với Laravel](https://heliotech.me/blog/connect-laravel-with-mysql)
+
+Chạy dự án lên:
+
+```bash
+$ php artisan serve
+```
+
+Ứng dụng của bạn sẽ đuọc chạy ở địa chỉ http://127.0.0.1:8000
+
+## Xây dựng chức năng Đăng nhập và Đăng ký bằng Breeze
+
+Ứng dụng chat của chúng ta sẽ cần đăng nhập để gửi tin nhắn, điều này nhận biết người gửi là ai. Mình sẽ sử dụng Laravel Breeze, đây là một package của Laravel nhằm triển khai nhanh chóng các thành phần đăng nhập và đăng ký trong ứng dụng:
+
+```bash
+$ composer require laravel/breeze
+```
+
+Tiếp theo cài đặt các thành phần của Breeze vào ứng dụng, lệnh này sẽ tự động sinh ra các route và controller phục vụ cho việc đăng nhập/đăng ký:
+
+```bash
+$ php artisan breeze:install
+```
+
+Chạy `npm` để build các thành phần của Breeze:
+
+```bash
+$ npm install
+
+$ npm run dev
+```
+
+Chạy `migrate` để tạo bảng `users` trong CSDL:
+
+```bash
+$ php artisan migrate
+```
+
+Bây giờ bạn đã có thể thử thực hiện đăng nhập và đăng ký trên ứng dụng của mình bằng địa chỉ:
+
+- Đăng nhập: http://127.0.0.1:8000/login
+- Đăng ký: http://127.0.0.1:8000/register
+
+## Tạo model Message để quản lý tin nhắn
+
+### Tạo model và migration
+
+Để tạo một model và migration cùng lúc, các bạn dùng lệnh `make:model` kèm theo tham số `-m`
+
+```bash
+$ php artisan make:model Message -m
+```
+
+Mở file migration vừa tạo trong thư mục `database/migrations/xxx_create_messages_table.php`. Nội dung của bảng `massages` gồm các cột:
+
+```php {4-7} showLineNumbers
+public function up()
+{
+    Schema::create('messages', function (Blueprint $table) {
+        $table->increments('id');
+        $table->integer('user_id')->unsigned();
+        $table->text('message');
+        $table->timestamps();
+    });
+}
+```
+
+Chậy lệnh migrate lần nữa để tạo bảng:
+
+```bash
+$ php artisan migrate
+```
+
+### Cấu hình quan hệ User - Message
+
+Bạn hãy mở file `app/Models/Message.php` ra và sửa nội dung của nó như sau:
+
+```php {5-10} showLineNumbers
+class Message extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['message'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+Tương tự, ở bên model `app/Models/User.php` ta cũng cần khai báo relationship `messages`
+
+```php {5-8} showLineNumbers
+class User extends Authenticatable
+{
+		...
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+}
+```
+
+## Livewire Component xử lý chat
+
+Để cài đặt **Laravel Livewire** bạn dùng lệnh sau:
+
+```bash
+$ composer require livewire/livewire
+```
+
+Mình sẽ tạo một Livewire component - nó sẽ bao gồm hai phần là controller và view:
+
+```bash
+$ php artisan make:livewire chat
+```
+
+Lệnh này sẽ tạo ra 2 file là `app/Http/Livewire/Chat.php` và `resources/views/livewire/chat.blade.php`
+
+### Cấu hình Route cho Livewire component
+
+```php {} showLineNumbers
+require __DIR__.'/auth.php';
+
+Route::get('/chat', \App\Http\Livewire\App::class)->middleware(['web', 'auth']);
+```
+
+### Cấu hình layout cho Livewire
+
+View sẽ mặt địch được gắn vào `{{ $slot }}` của `views/layouts/app.blade.php` vì vậy chúng ta cần chỉnh sửa lại nội dung của nó như sau:
+
+```html {11,17} showLineNumbers
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Styles -->
+    @livewireStyles
+  </head>
+  <body class="font-sans antialiased">
+    {{ $slot }} @livewireScripts
+  </body>
+</html>
+```
+
+Ở đây bạn chú ý đến 2 dòng bắt buộc phải có là `@livewireStyles` trên thẻ head và `@livewireScripts` trong thẻ body
+
+### Nội dung của view và controller
+
+Chúng ta sẽ bắt đầu từ view trước, mở file `resources/views/livewire/chat.blade.php` lên:
+
+```html {} showLineNumbers
+<div>
+  @foreach($messages as $message)
+  <div class="mb-1">{{ $message->user->name }}: {{ $message->message }}</div>
+  @endforeach
+
+  <form wire:submit.prevent="send">
+    <input type="text" wire:model="message" />
+    <button type="submit">Send</button>
+  </form>
+</div>
+```
+
+Nội dung file `app/Http/Livewire/Chat.php`
+
+```php {} showLineNumbers
+<?php
+
+namespace App\Http\Livewire;
+
+use App\Models\Message;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+
+class Chat extends Component
+{
+    public $message;
+    public $messages;
+
+    public function render()
+    {
+        $this->messages = Message::all();
+
+        return view('livewire.chat');
+    }
+
+    public function send()
+    {
+        $user = Auth::user();
+
+        $message = $user->messages()->create([
+            'message' => $this->message
+        ]);
+
+        $this->reset();
+    }
+}
+```
+
+### Giải thích cách hoạt động của Livewire
+
+Ở trong class `Chat.php` bạn sẽ thấy hàm `render()` đây chính là hàm sẽ khởi chạy khi bạn gọi đến một component, nó sẽ lấy tất cả các dữ liệu trong model **Message** và gán vào biến `$this->messages`
+
+Khi gán nó là một biến public thì ở view bạn có thể thoải mái truy cập nó, ở view ta có `@foreach` để in ra tất cả câu chat của người dùng.
+
+Tiếp theo đó bạn sẽ thấy trong view có đoạn `wire:submit.prevent="send"` cách này sẽ khai báo cho livewire biết rằng, khi submit form này thì sẽ gọi hàm `send()` bên trong controller.
+
+Input `wire:model="message"` giống như Vue hay Angular, nó cho phép bạn tự động gán biến `$this->massage` vào input đó. Input thay đổi thì biến này sẽ thay đổi theo.
+
+Khi ấn Gửi thì hàm `send()` sẽ chạy và lấy dữ liệu đó thêm vào CSDL. Đồng thời `$this->reset` sẽ trả tất cả dữ liệu của component trở về giá trị ban đầu.
+
+## Sử dụng wire:poll để tự động tải tin nhắn
+
+Livewire hỗ trợ cho chúng ta thuộc tính `wire:poll` thuộc tính này sẽ tự động chạy lại `render()` của component mỗi 2s để theo dõi sự thay đổi. Sửa lại một chúng ở view `chat.blade.php`
+
+```html {1} showLineNumbers
+<div wire:poll>
+  @foreach($messages as $message)
+  <div class="mb-1">{{ $message->user->name }}: {{ $message->message }}</div>
+  @endforeach
+
+  <form wire:submit.prevent="send">
+    <input type="text" wire:model="message" />
+    <button type="submit">Send</button>
+  </form>
+</div>
+```
+
+### Thử gửi tin nhắn
+
+Bây giờ bạn hãy thử gửi tin nhắn bằng cách nhập nội dung vào trong input và ấn Gửi xem dữ liệu có thêm vào bảng thành công không? Nếu đã thêm thành công, việc bây giờ chỉ cần cấu hình cho những người khác có thể nhận được tin nhắn.
+
+Phần 2 đang được thực hiện, để nhận được thông báo về các bài viết mới trên Heliotech:
+
+<BlogNewsletterForm />
