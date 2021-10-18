@@ -1,0 +1,285 @@
+---
+title: 'Xây dựng chatbox với Laravel Livewire phần 2'
+date: 2021-10-19T02:00:00Z
+lastmod: '2021-10-19'
+tags: ['laravel', 'guide', 'livewire', 'pusher']
+draft: false
+summary: 'Xây dựng một ứng dụng chat thời gian thực (realtime chat box) đơn giản với Livewire và Pusher phần tiếp theo'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Giới thiệu
+
+Trong phần trước chúng ta đã làm quen với Livewire và cũng biết cách nó tạo ra tương tác gia front-end và back-end như thế nào, trong bài viết này, mình sẽ giới thiệu đến các bạn cách sử dụng Broadcasting trong Laravel và Pusher - một dịch vụ socket miễn phí mà bạn có thể sử dụng cho các dự án của mình để thực hiện gửi thông báo realtime đến các client hiện tại:
+
+Để thực hiện được hướng dẫn dưới đây, bạn phải thực hiện hoàn tất những gì ở [Phần 1 - Cài đặt livewire và tạo các model](https://heliotech.me/blog/chatbox-with-livewire-and-pusher-p1).
+
+## Cài đặt Broadcasting để gửi đi sự kiện
+
+Để Laravel có thể phát đi các sự kiện đến người dùng khác (broadcasting) thì bạn cần đăng ký service của nó bên trong `config/app.php` bạn hãy vào file này và bỏ `//` đầu dòng đi (uncomment)
+
+```php
+// App\Providers\BroadcastServiceProvider::class,
+👇
+App\Providers\BroadcastServiceProvider::class,
+```
+
+Sau đó, bạn cần thay đổi `BROADCAST_DRIVER` mặc định trong `.env` thành `pusher`
+
+```dotenv {} showLineNumbers
+BROADCAST_DRIVER=pusher
+```
+
+Tuy rằng Laravel đã hỗ trợ sẵn các cấu hình cho Pusher, tuy nhiên ta vẫn cần cài đặt Pusher SDK cho dự án của mình, hãy chạy lệnh sau:
+
+```bash
+$ composer require pusher/pusher-php-server
+```
+
+## Cấu hình Pusher
+
+Trước khi cấu hình Pusher, bạn hãy tạ một tài khoản miễn phí tại [https://dashboard.pusher.com/accounts/sign_up](https://dashboard.pusher.com/accounts/sign_up) sau đó đăng nhập vào bảng điều khiển.
+
+Sau khi đăng nhập thành công, bạn hãy ấn vào **Channel** và tạo một **App** mới (gói sandbox miễn phí). Bạn chỉ cần đặt tên cho ứng dụng và cấu hình máy chủ sử dụng (nên chọn Singapore)
+
+- Front-end engine: Laravel Echo
+- Back-end engine: Laravel
+
+Sau khi tạo thành công, bạn sẽ có được các thông tin bao gồm APP_ID, APP_Key, ... Hãy sao chép nó vào bên trong file `.env` của bạn:
+
+```dotenv {} showLineNumbers
+PUSHER_APP_ID=12839xx
+PUSHER_APP_KEY=2dfa7dcc3c2b509axxxx
+PUSHER_APP_SECRET=04c798031ade6381xxxx
+PUSHER_APP_CLUSTER=ap1
+```
+
+## Tạo sự kiện gửi tin nhắn
+
+Để thực hiện gửi tin nhắn thời gian thực, bạn cần tạo ra một sự kiện, ví dụ ở đây là `SendMessage` mỗi khi một tin nhắn gửi đến hệ thống, nó sẽ tự động chạy sự kiện này và thông báo cho các kênh (channel) đảm nhận việc xử lý nó.
+
+Để tạo một Event trên Larave ta dùng lệnh:
+
+```bash
+$ php artisan make:event MessageSent
+```
+
+Một class sự kiện sẽ được tạo ra bên trong thư mục `app\Events` hãy mở thư mục này ra và bạn sẽ thấy file `MessageSent` bạn cần thông báo cho Laravel biết rằng sự kiện này sẽ thực hiện Broadcast bằng cách `implements ShouldBroadcast`
+
+```php {8} showLineNumbers
+<?php
+
+namespace App\Events;
+
+...
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+
+class MessageSent implements ShouldBroadcast
+{
+		...
+}
+```
+
+Nội dung đầy đủ của Event như sau:
+
+```php {17-18,25-29,38} showLineNumbers
+<?php
+
+namespace App\Events;
+
+use App\Models\Message;
+use App\Models\User;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class MessageSent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $user;
+    public $message;
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct(User $user, Message $message)
+    {
+        $this->user = $user;
+        $this->message = $message;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        return new Channel('chat');
+    }
+}
+```
+
+Bây giờ bạn cần cho Laravel biết, khi nào thì sự kiện này diễn ra, hãy mở file `Chat.php` lên và thêm vào hàm `send`
+
+```php {11} showLineNumbers
+public function send()
+{
+    $user = Auth::user();
+
+    $message = $user->messages()->create([
+        'message' => $this->message
+    ]);
+
+    $this->reset();
+
+    broadcast(new MessageSent($user, $message))->toOthers();
+}
+```
+
+Bây giờ hãy thử đăng nhập vào Dashboard của Pusher và thực hiện gửi tin nhắn thử. Nếu tin nhắn của bạn được gửi thành công đến Pusher, **Total messages sent today** của bạn sẽ tăng lên:
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b968f62e-1913-404c-947a-c119e9178bb3/Untitled.png)
+
+## Bắt sự kiện tin nhắn mới bằng Laravel Echo
+
+Laravel Echo là một thư viện JS hỗ trợ việc bắt sự kiện socket. Để cài đặt Laravel Echo các bạn cần chạy lệnh sau:
+
+```bash
+$ npm install --save laravel-echo pusher-js
+```
+
+Mở file `resources/js/bootstrap.js` lên và uncomment (bỏ `//`) cấu hình cho Echo:
+
+```jsx {7-16} showLineNumbers
+/**
+ * Echo exposes an expressive API for subscribing to channels and listening
+ * for events that are broadcast by Laravel. Echo and event broadcasting
+ * allows your team to easily build robust real-time web applications.
+ */
+
+import Echo from 'laravel-echo'
+
+window.Pusher = require('pusher-js')
+
+window.Echo = new Echo({
+  broadcaster: 'pusher',
+  key: process.env.MIX_PUSHER_APP_KEY,
+  cluster: process.env.MIX_PUSHER_APP_CLUSTER,
+  forceTLS: true,
+})
+```
+
+Thực hiện lại lệnh build JS:
+
+```jsx
+$ npm run dev
+```
+
+Chèn JS đã được build vào `views/layouts/app.blade.php`
+
+```html {7} showLineNumbers
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <script src="{{ asset('js/app.js') }}" defer></script>
+
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+    />
+
+    <!-- Styles -->
+    @livewireStyles
+  </head>
+  <body class="font-sans antialiased">
+    {{ $slot }} @livewireScripts
+  </body>
+</html>
+```
+
+Bỏ `wire:poll` ở view `resources/views/livewire/app.blade.php` đi nhé:
+
+```html {1} showLineNumbers
+<div>
+  @foreach($messages as $message)
+  <div class="mb-1">{{ $message->user->name }}: {{ $message->message }}</div>
+  @endforeach
+
+  <form wire:submit.prevent="send">
+    <input type="text" wire:model="message" />
+    <button type="submit">Send</button>
+  </form>
+</div>
+```
+
+Cấu hình sự kiện echo trong Livewire controller `app/Http/Livewire/App.php`
+
+```php {15,37-40} showLineNumbers
+<?php
+
+namespace App\Http\Livewire;
+
+use App\Events\MessageSent;
+use App\Models\Message;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+
+class App extends Component
+{
+    public $message;
+    public $messages;
+
+    protected $listeners = ['echo:chat,MessageSent' => 'reloadMessages'];
+
+    public function render()
+    {
+        $this->messages = Message::all();
+
+        return view('livewire.app');
+    }
+
+    public function send()
+    {
+        $user = Auth::user();
+
+        $message = $user->messages()->create([
+            'message' => $this->message
+        ]);
+
+        $this->reset();
+
+        broadcast(new MessageSent($user, $message))->toOthers();
+    }
+
+    public function reloadMessages($event)
+    {
+        $this->messages->concat($event['message']);
+    }
+}
+```
+
+Như bạn thấy ở đây, khi nhận được sự kiện `MessageSent` từ kênh `chat` Livewire sẽ cần thực hiện hàm `reloadMessages`
+
+Trong hàm `reloadMessages` mình sẽ lấy tin nhắn vừa nhận được (trong `$event` có hai phần tử là **user** và **message** mình chỉ cần **message**) và thêm nó vào mảng `$this->massages` của component.
+
+Khi dữ liệu của component được cập nhât, view cũng sẽ tự động được reload lại mà không cần `wire:poll` nữa
+
+Nếu bạn có thắc mắc gì trong quá trình làm, đừng ngại comment bên dưới để mình hỗ trợ nhé.
+
+<BlogNewsletterForm />

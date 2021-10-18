@@ -2,7 +2,7 @@
 title: 'Xây dựng chatbox với Laravel Livewire phần 1'
 date: 2021-10-19T01:00:00Z
 lastmod: '2021-10-19'
-tags: ['laravel', 'guide']
+tags: ['laravel', 'guide', 'livewire', 'pusher']
 draft: false
 summary: 'Xây dựng một ứng dụng chat thời gian thực (realtime chat box) đơn giản với Livewire và Pusher'
 layout: PostSimple
@@ -12,6 +12,8 @@ layout: PostSimple
 
 <TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
 
+## Giới thiệu
+
 Chào các bạn, mình vừa tìm hiểu về một công nghệ rất thú vị và có tính ứng dụng cao, đó chính là Livewire. Trên trang chủ của Livewire nó được giới thiệu như là một full-stack framework cho Laravel, nó giúp cho việc xây dựng giao diện tương tác với hệ thống một cách dễ dàng tự động sinh ra các API và các JS theo nhu cầu của người dùng.
 
 Trong chuỗi bài viết này mình sẽ hướng dẫn các bạn từng bước để làm một phòng chat bằng cách sử dụng Laravel Livewire kết hợp với Pusher (dịch vụ socketio).
@@ -20,7 +22,7 @@ Trong chuỗi bài viết này mình sẽ hướng dẫn các bạn từng bư�
 
 Đầu tiên bạn cần tạo một project Laravel bằng lệnh:
 
-```php
+```bash
 $ laravel new laravel-chat
 ```
 
@@ -266,6 +268,6 @@ Livewire hỗ trợ cho chúng ta thuộc tính `wire:poll` thuộc tính này s
 
 Bây giờ bạn hãy thử gửi tin nhắn bằng cách nhập nội dung vào trong input và ấn Gửi xem dữ liệu có thêm vào bảng thành công không? Nếu đã thêm thành công, việc bây giờ chỉ cần cấu hình cho những người khác có thể nhận được tin nhắn.
 
-Phần 2 đang được thực hiện, để nhận được thông báo về các bài viết mới trên Heliotech:
+Xem tiếp [Xây dựng chatbox với Laravel Livewire phần 2](/blog/chatbox-with-livewire-and-pusher-p2) - Cấu hình Pusher
 
 <BlogNewsletterForm />
