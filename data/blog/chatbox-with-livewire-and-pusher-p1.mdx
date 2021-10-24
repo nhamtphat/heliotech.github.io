@@ -81,7 +81,7 @@ Bây giờ bạn đã có thể thử thực hiện đăng nhập và đăng ký
 $ php artisan make:model Message -m
 ```
 
-Mở file migration vừa tạo trong thư mục `database/migrations/xxx_create_messages_table.php`. Nội dung của bảng `massages` gồm các cột:
+Mở file migration vừa tạo trong thư mục `database/migrations/xxx_create_messages_table.php`. Nội dung của bảng `messages` gồm các cột:
 
 ```php {4-7} showLineNumbers
 public function up()
@@ -243,7 +243,7 @@ Khi gán nó là một biến public thì ở view bạn có thể thoải mái 
 
 Tiếp theo đó bạn sẽ thấy trong view có đoạn `wire:submit.prevent="send"` cách này sẽ khai báo cho livewire biết rằng, khi submit form này thì sẽ gọi hàm `send()` bên trong controller.
 
-Input `wire:model="message"` giống như Vue hay Angular, nó cho phép bạn tự động gán biến `$this->massage` vào input đó. Input thay đổi thì biến này sẽ thay đổi theo.
+Input `wire:model="message"` giống như Vue hay Angular, nó cho phép bạn tự động gán biến `$this->message` vào input đó. Input thay đổi thì biến này sẽ thay đổi theo.
 
 Khi ấn Gửi thì hàm `send()` sẽ chạy và lấy dữ liệu đó thêm vào CSDL. Đồng thời `$this->reset` sẽ trả tất cả dữ liệu của component trở về giá trị ban đầu.
 

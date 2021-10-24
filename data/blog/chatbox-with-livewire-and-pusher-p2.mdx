@@ -276,7 +276,7 @@ class App extends Component
 
 Như bạn thấy ở đây, khi nhận được sự kiện `MessageSent` từ kênh `chat` Livewire sẽ cần thực hiện hàm `reloadMessages`
 
-Trong hàm `reloadMessages` mình sẽ lấy tin nhắn vừa nhận được (trong `$event` có hai phần tử là **user** và **message** mình chỉ cần **message**) và thêm nó vào mảng `$this->massages` của component.
+Trong hàm `reloadMessages` mình sẽ lấy tin nhắn vừa nhận được (trong `$event` có hai phần tử là **user** và **message** mình chỉ cần **message**) và thêm nó vào mảng `$this->messages` của component.
 
 Khi dữ liệu của component được cập nhât, view cũng sẽ tự động được reload lại mà không cần `wire:poll` nữa
 
