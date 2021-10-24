@@ -1,0 +1,122 @@
+---
+title: 'Giải thích về các lệnh cache trên Laravel'
+date: 2021-10-24T22:00:00Z
+lastmod: '2021-10-24'
+tags: ['laravel', 'cache']
+draft: false
+summary: 'Trong Laravel có 5 loại cache khác nhau phục vụ những mục đích khác nhau, xem đó là gì nhé.'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Giới thiệu
+
+Đối vói các bạn chưa biết, Laravel cung cấp sẵn cho ta một số các bộ nhớ đệm mặc định để tối ưu hoá trải nghiệm người dùng, tuy nhiên trong lúc dev bạn sẽ gặp phải một số vấn đề về cache, ví dụ như việc không cập nhật giao diện sau khi chỉnh sửa (cache view)
+
+## Cache cấu hình (Config cache)
+
+Cache cấu hình giúp cho các cấu hình bên trong file `.env` của bạn được load nhanh hơn, để xoá cache này bạn dùng lệnh:
+
+```bash
+$ php artisan config:clear
+Configuration cache cleared!
+```
+
+Nếu bạn muốn reset và tạo lại cache mới tức thì, bạn hãy sử dụng lệnh:
+
+```bash
+$ php artisan config:cache
+Configuration cache cleared!
+Configuration cached successfully!
+```
+
+## Cache route (Router cache)
+
+Cache route sẽ giúp bạn giảm rất nhiều thời gian để ứng dụng của bạn có thể tải dược danh sách các route và action tương ứng của nó. Để xoá cache route bạn dùng lệnh:
+
+```bash
+$ php artisan route:clear
+Route cache cleared!
+```
+
+Tương tự, để tạo lại cache mới bạn hãy chạy lệnh sau:
+
+```bash
+$ php artisan route:cache
+Route cache cleared!
+Routes cached successfully!
+```
+
+## Cache view (View cache)
+
+Đây có lẽ là cái bạn thường gặp dùng nhất, mặc định, [các file `.blade.php` nằm trong thư mục `/resourses/views/`](https://heliotech.me/blog/to-chuc-thu-muc-views-cho-cac-du-an-laravel) khi gọi đến lần đầu sẽ được biên dịch ra file `.php` và lưu trong thư mục `/storage`. Để xoá cache view bạn hãy dùng lệnh:
+
+```bash
+$ php artisan view:clear
+Compiled views cleared!
+```
+
+Bạn cũng có thể chủ động biên dịch trước tất các file `blade` để giảm tải thời gian khi lần đầu truy cập:
+
+```
+$ php artisan view:cache
+Compiled views cleared!
+Blade templates cached successfully!
+```
+
+## Cache sự kiện (Event cache)
+
+Nếu bạn đang sử dụng Event trong ứng dụng Laravel của mình, bạn nên lưu Event vào bộ nhớ cache, vì như vậy Laravel sẽ không cần quét tất cả các listener trong mỗi request.
+
+Xoá cache Event:
+
+```bash
+$ php artisan event:clear
+Cached events cleared!
+```
+
+Xoá và tạo lại cache mới:
+
+```bash
+$ php artisan event:cache
+Cached events cleared!
+Events cached successfully!
+```
+
+## Cache ứng dụng (Application cache)
+
+Sử dụng cache là một cách để bạn tăng tốc ứng dụng của bạn và tối ưu hoá những tài nguyên thường sử dụng mà không xử lý lại. Cache ứng dụng sẽ được lưu trong thư mục `/storage/framework/cache/data` và thao tác thông qua facade `Cache`
+
+Để xoá cache này bạn hãy dùng lệnh:
+
+```bash
+$ php artisan cache:clear
+Application cache cleared!
+```
+
+**Lưu ý: Lệnh này sẽ không xoá các cache cấu hình, route và view. Cache ứng dụng là cache mà lập trình viên chủ động tạo ra và sử dụng.**
+
+## Xoá tất cả cache
+
+Khi cần thiết mà phải chạy hết tất cả 5 lệnh bên trên thì thật phiền phức, một trong những cách đơn giản là chạy lệnh:
+
+```bash
+$ php artisan optimize:clear
+Compiled views cleared!
+Application cache cleared!
+Route cache cleared!
+Configuration cache cleared!
+Compiled services and packages files removed!
+Caches cleared successfully!
+```
+
+Bạn cũng có thể cache lại mọi thứ bằng lệnh:
+
+```bash
+$ php artisan optimize
+```
+
+Nếu bạn thích những bài viết thế này, hãy like [Fanpage](http://fb.com/heliotech.me) [](http://fb.com/heliotech-me)ủng hộ tụi mình nhé!
