@@ -79,9 +79,10 @@ export const BlogSEO = ({ authorDetails, title, summary, date, lastmod, url, ima
       : images
 
   const featuredImages = imagesArr.map((img) => {
+    let image_url = img.search('http') !== -1 ? img : siteMetadata.siteUrl + img
     return {
       '@type': 'ImageObject',
-      url: `${siteMetadata.siteUrl}${img}`,
+      url: image_url,
     }
   })
 
