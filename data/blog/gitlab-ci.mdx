@@ -1,0 +1,200 @@
+---
+title: 'Hướng dẫn cài đặt CI/CD tự động test, tự động deploy trên Gitlab'
+date: 2021-11-16T21:00:00Z
+lastmod: '2021-11-16'
+tags: ['laravel', 'gitlab', 'docker']
+draft: false
+summary: 'Một cách tiện lợi và thú vị hơn để Gitlab tự động test và deploy thay cho bạn, việc này sẽ giúp bạn tiết kiệm rất nhiều thời gian, cùng xem nhé!'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## CI/CD là gì?
+
+**CI/CD là viết tắt của hai cụm từ Continuous Integration** và **Continuous Delivery**, ý nói là quá trình tích hợp (integration) thường xuyên, nhanh chóng hơn khi code cũng như thường xuyên cập nhật phiên bản mới (delivery).
+
+Trong khi phát triển dự án, bạn sẽ nhiều lần phải deploy một sản phẩm lên staging hoặc production, nếu việc này được thực hiện thủ công thì bạn sẽ tốn rất nhiều thời gian, cứ mỗi lần có merge PR mới là bạn phải thực hiện đăng nhập lên server và thực hiện các lệnh như pull, composer, npm, ...
+
+Việc này có thể dễ dàng hơn nếu bạn biết cách setup một quy trình tự động CI/CD, thật may mắn là cả Gitlab và Github đều cung cấp sẵn cho bạn những công cụ để làm những việc này.
+
+## Ý tưởng như thế nào?
+
+Bây giờ cứ mỗi khi có một PR được merge hay commit mới được push lên Gitlab, Gitlab sẽ tự động chạy script mà bạn bạn cung cấp trong file gitlab-ci.yml
+
+<S3Image src="/posts/gitlab-ci/1.png" />
+
+Nhìn vào hình trên đây các bạn se có thể dễ dàng hình dung được, khi có người push hoặc merge PR thì CI/CD sẽ được chạy, Gitlab sẽ thực hiện các công việc do chúng ta định trước như build mã nguồn, sau đó chạy test.
+
+Sau các bước kiểm tra, Gitlab sẽ kết nối với server thông qua SSH và điều khiển server pull code từ Gitlab về, và thực hiện các lệnh deploy.
+
+## Chuẩn bị
+
+Để các kết nối giữa gitlab và server được liên tục và dễ dàng, ta sẽ sử dụng SSH key thay vì mật khẩu.
+
+### Tạo SSH Key
+
+Đầu tiên hãy đăng nhập vào server và tạo một SSH Key:
+
+```bash
+# Login SSH using password
+$ ssh sshuser@hostname.com
+sshuser@hostname's password:
+```
+
+Tạo SSH Key, mình khuyên dùng **ed25519**, đối với thuật toán **rsa** thì có thể sẽ gặp một số lỗi không thể kết nối được.
+
+```bash
+$ ssh-keygen -t ed25519
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/user/.ssh/id_ed25519):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/user/.ssh/id_ed25519
+Your public key has been saved in /home/user/.ssh/id_ed25519.pub
+...
+```
+
+Sau khi tạo xong thì trong thư mục `~/.ssh/` sẽ có 2 file là `id_ed25519` (private key) và `id_ed25519.pub` (public key).
+
+Sau đó chúng ta hãy khai báo key này vào SSH Agent để khi pull code sẽ dùng key này để xác thực.
+
+```bash
+$ eval $(ssh-agent -s)
+$ ssh-add ~/.ssh/id_ed25519
+```
+
+Và tiếp theo, bạn cần cho phép key này thực hiện đang nhập bằng cách copy nội dung của **public key** vào file `authorized_keys`
+
+```bash
+$ cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+```
+
+### Cài đặt SSH Key lên Gitlab
+
+Để bạn có thể pull code về từ repository mà không cần phải đăng nhập vào gitlab thì bạn cần phải khai báo SSH Key vừa tạo vào tài khoản của mình.
+
+1. Đăng nhập vào Gitlab
+2. Chọn vào **Tài khoản** > **Preferences** > **SSH Key**
+3. Sao chép nôi dung trong file public key lúc nãy `id_ed25519.pub` vào ô key
+4. Ấn Add key để thêm vào tài khoản
+
+Tiếp theo bạn cần phải khai báo địa chỉ repo dưới giao thức git thay vì https.
+
+Hãy đăng nhập vào server và thực hiện thay đổi địa chỉ repo lại như sau:
+
+```bash
+$ cd /home/username/hostname.com
+
+# Xoá repo cũ (tuỳ chọn)
+$ git remote remove origin
+
+# Thêm repo mới, hãy thay link git của bạn nhé
+$ git remote add origin git@gitlab.com:user/project-name.git
+```
+
+### Cài đặt tham số cho Gitlab CI/CD
+
+Bạn hãy vào **Project Settings** > **CI/CD** > **Variables**. Và thêm 4 tham số sau vào:
+
+- SSH_FOLDER - Thư mục sẽ deploy code trên server, ví dụ `/home/username/hostname.com`
+- SSH_HOST - Địa chỉ IP của server, ví dụ `172.96.191.1`
+- SSH_PRIVATE_KEY - Nội dung file **private key** tạo ra lúc nãy, `----BEGIN OPENSSH PRIVATE...`
+- SSH_USER - User dùng để đăng nhập SSH, ví dụ `sshuser`
+
+**Lưu ý:** Nếu các thuộc tính các bạn đặt là **Protected** thì chỉ sử dụng được trên các branch được cấu hình là projected. Để cấu hình hãy vào **Project Settings** > **Repository**
+
+## Triển khai CI/CD
+
+Trong phần này mình sẽ không nói chi tiết cụ thể, các bạn sẽ chỉnh sửa đoạn code mẫu dưới đây và lưu nó với tên `gitlab-ci.yml` trong thư mục gốc của repo, Gitlab sẽ tự động làm những việc còn lại:
+
+```yaml
+image: lorisleiva/laravel-docker:7.4
+
+# Pick zero or more services to be used on all builds.
+# Only needed when using a docker container to run your tests in.
+# Check out: http://docs.gitlab.com/ee/ci/docker/using_docker_images.html#what-is-a-service
+# Document: https://lorisleiva.com/laravel-deployment-using-gitlab-pipelines/
+
+services:
+  - mysql:latest
+  - redis:latest
+
+variables:
+  MYSQL_DATABASE: project_name
+  MYSQL_ROOT_PASSWORD: secret
+  REDIS_PORT: 6379
+
+composer:
+  stage: build
+  script:
+    - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+    - cp .env.testing .env
+    - php artisan key:generate
+
+  artifacts:
+    expire_in: 1 month
+    paths:
+      - vendor/
+      - .env
+
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-composer
+    paths:
+      - vendor/
+
+phpunit:
+  stage: test
+  script:
+    - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+    - touch database/database.sqlite
+    - php artisan migrate
+    - php artisan db:seed
+    - php artisan test
+
+codestyle:
+  stage: test
+  dependencies: []
+  script:
+    - phpcs -n --standard=PSR2 --extensions=php --ignore=app/Support/helpers.php app
+
+.init_ssh: &init_ssh |
+  which ssh-agent || ( apt-get install -qq openssh-client )
+  eval $(ssh-agent -s)
+  echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  mkdir -p ~/.ssh
+  chmod 700 ~/.ssh
+  [[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+deploy:
+  stage: deploy
+  script:
+    - *init_ssh
+    - |
+      ssh $SSH_USER@$SSH_HOST << EOT
+      cd $SSH_FOLDER
+      git pull origin develop
+      composer install
+      php artisan migrate --force
+      php artisan optimize
+      exit
+      EOT
+  only:
+    - develop
+```
+
+Cụ thể thì trong đây chúng ta sẽ có 3 giai đoạn như sau:
+
+- Giai đoạn **build**: Chạy lệnh `composer install`
+- Giai đoạn **test**: Gồm 2 job là **unittest** và **codestyle**
+- Giai đoạn **deploy**: Chỉ chạy trên branch develop, thực hiện các công việc kết nối SSH và điều khiển server pull code và cài đặt.
+
+## Các trường hợp khác
+
+Tuỳ vào trường hợp trong từng dự án các bạn có thể tuỳ biến đoạn code trên có thể thêm vào build npm hoặc deploy lên production với branch main,... Các bạn có thể tham khảo thêm các hướng dẫn khác tại đây:
+
+- [https://lorisleiva.com/laravel-deployment-using-gitlab-pipelines/](https://lorisleiva.com/laravel-deployment-using-gitlab-pipelines/)
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
