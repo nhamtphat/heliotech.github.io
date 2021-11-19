@@ -1,0 +1,88 @@
+---
+title: 'Kiểm tra và tự động sửa lỗi code style bằng PHPCS và PHPCBF'
+date: 2021-11-19T15:30:00Z
+lastmod: '2021-10-19'
+tags: ['laravel', 'guide']
+draft: false
+summary: 'Nếu bạn code một mình thì code sao cũng được cả, nhưng nếu làm việc trong dự án chung với nhiều người thì xài cái này đi'
+layout: PostSimple
+image: https://heliotech-public.s3.ap-southeast-1.amazonaws.com/posts/phpcs/1.png
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Code style là gì? Code mà cũng có sì-ti-le sao?
+
+Vâng, câu trả lời thì có, mà đúng hơn đó là style của người viết ra những dòng code này. Nếu bạn làm trong ngày lập trình thì chắc bạn sẽ gặp các meme dưới đây:
+
+<S3Image src="/posts/phpcs/1.png" />
+
+Việc đó có thể không thành vấn đề nếu bạn chỉ làm việc một mình, code sao là tuỳ bạn, nhưng nếu làm việc trong dự án chung với nhiều người, hoặc đóng góp code cho các dự án mã nguồn mở, bạn sẽ sớm bị PK thôi (cái này ai chơi võ lâm chắc biết) .
+
+Thậm chí là có một số chuẩn code style được đưa ra và thống nhất sử dụng rộng rãi trong cộng đồng lập trình viết, ví dụ như các chuẩn **PSR - PHP Standards Recommendations**
+
+## Thế còn PHPCS là gì? Nó giúp gì để định hình style cho code?
+
+PHPCS là một phần mềm giúp bạn dễ dàng kiểm tra xem đoạn code mình viết ra có đúng với các chuẩn (standard) không? Ví dụ, nếu bạn xác định áp dụng PSR-2 mà code bạn như thế này:
+
+```php {} showLineNumbers
+function ten_ham(thamso1,thamso2) {
+	echo "hello";
+}
+```
+
+Thì code của bạn sẽ bị báo ERROR là:
+
+```
+----------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------
+ 3 | ERROR | [x] Opening brace should be on a new line
+----------------------------------------------------------------------
+```
+
+Bạn có thể tìm hiểu thêm về chuẩn PSR-2 và các chuẩn khác của PSR tại [https://www.php-fig.org/psr/](https://www.php-fig.org/psr/)
+
+## PHPCS sẽ giúp bạn tìm lỗi code style
+
+Bạn có thể dễ dàng cài đặt PHPCS thông qua composer bằng cách chạy lệnh:
+
+```bash
+$ composer global require "squizlabs/php_codesniffer=*"
+```
+
+Hoặc có thể tìm hiểu về các các cài đặt khác tại trang Github của dự án:
+
+Link Github: https://github.com/squizlabs/PHP_CodeSniffer
+
+Kiểm tra code:
+
+```bash
+$ phpcs --standard=<PSR-name> --extensions=<php> --ignore=<ignore-files> <folder/file-will-test>
+```
+
+Ví dụ muốn kiểm tra tất cả file `php` trong thư mục `/app` trong Laravel, bỏ qua tập tin `helpers.php`:
+
+```bash
+$ phpcs --standard=PSR2 --extensions=php --ignore=app/Support/helpers.php app
+```
+
+Sau khi chạy thì chương trình sẽ báo bạn đang bị sai ở những file nào, và dòng nào.
+
+Một số lỗi sẽ có thể sửa tự động bằng **phpcs** , mình sẽ hướng dẫn dưới đây, tuy nhiên một số lỗi khác **phpcs** sẽ không tự động sửa được do nó sẽ ảnh hưởng đến logic của code, ví dụ như tên hàm không ở định dạng camelCase.
+
+## PHPCBF sẽ giúp bạn sửa lỗi code style!
+
+**phpcbf** là một thành phần đi kèm với **phpcs** nếu bạn cài đặt bằng câu lệnh composer ở trên.
+
+Để sử dụng **phpcbf,** bạn chỉ cần đơn giản là chạy lại lệnh mà bạn dùng để kiểm tra, thay lệnh thành **phpcbf** là được, ví dụ:
+
+```bash
+$ phpcbf --standard=PSR2 --extensions=php --ignore=app/Support/helpers.php app
+```
+
+Ngoài ra mình đã làm một hướng dẫn trước đó về cách cài đặt phpcs lên Github Action hay Gitlab CI để repository của bạn tự động kiểm tra code style khi có code mới được push lên.
+
+<BlogNewsletterForm title="Nếu bạn thích những bài thế này?" />
