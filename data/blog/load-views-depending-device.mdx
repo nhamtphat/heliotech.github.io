@@ -1,0 +1,124 @@
+---
+title: 'Load thư mục view tuỳ theo thiết bị đang truy cập desktop/mobile'
+date: 2021-11-24T18:30:00Z
+lastmod: '2021-10-24'
+tags: ['laravel', 'package', 'guide']
+draft: false
+summary: 'Nếu bạn có hai giao diện riêng dành cho điện thoại và máy tính, bạn có thể đặt tên file giống nhau và tách ra hai thư mục riêng, việc này sẽ giúp bạn xác định thư mục nào sẽ được load'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Đặt vấn đề
+
+Hôm nay lại nhận được một requirement thú vị là thiết kế kế riêng giao diện cho điện thoại và desktop. Trong nhiều trường hợp, chúng ta chỉ cần responsive thôi. Nhưng trong trường hợp này, nội dung của cả desktop và điện thoại khác nhau hoàn toàn, nên vì vậy cần tách riêng và nhận dạng xem thiết bị nào đang truy cập.
+
+## Nhận dạng thiết bị đang truy cập trên Laravel
+
+Do đây là lần đầu nên mình sẽ tìm thử xem, Laravel có cái gì đó build-in không, nếu không thì sẽ sử dụng package hoặc tự viết. Tìm kiếm theo từ khoá "laravel detect desktop mobile accessing"
+
+Kết quả đầu tiên từ StackOverflow, chúng ta có thư viện `jenssegers/agent`
+
+### Cài đặt jenssegers/agent thông qua Composer
+
+```
+$ composer require jenssegers/agent
+```
+
+### Cách sử dụng thư viện jenssegers/agent
+
+```php {} showLineNumbers
+use Jenssegers\Agent\Agent;
+
+$agent = new Agent();
+
+if ($agent->isMobile()) {
+    // Load views for mobile
+} else {
+    // Load views for desktop
+}
+```
+
+### Tích hợp jenssegers/agent vào Laravel
+
+Cách sử dụng cũng đơn giản, bây giờ chúng ta cần phải khai báo nó ở đâu đó trong Laravel để nó có thể chạy được. Lúc này sẽ có hai cách, một là sử dụng Provider, hai là dùng Middleware, tuy nhiên trong trường hợp này Provider sẽ là một lựa chọn hợp lý hơn:
+
+```bash
+$ php artisan make:provider AgentServiceProvider
+```
+
+Mở file `app/Providers/AgentServiceProvider.php` mà chúng ta vừa tạo lên, thêm nội dung bên trên vào hàm `boot()`:
+
+```php {7,26-35} showLineNumbers
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+use Jenssegers\Agent\Agent;
+
+class AgentServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $agent = new Agent();
+
+        if ($agent->isMobile()) {
+				    // Load views for mobile
+				} else {
+				    // Load views for desktop
+        }
+    }
+}
+```
+
+Sau báo provider này vào ứng dụng bằng cách mở file `config/app.php` lên:
+
+```php {3} showLineNumbers
+'providers' => [
+		...
+		App\Providers\AgentServiceProvider::class,
+}
+```
+
+## Load thư mục view theo từng thiết bị đang truy cập
+
+Việt này có thể dễ dàng thực hiện thông qua facade `View`
+
+```php
+View::addLocation('duong-dan');
+```
+
+Vậy bây giờ ta sẽ điều chỉnh một xíu ở `app/Providers/AgentServiceProvider.php` để thực hiện việc này:
+
+```php {6,8} showLineNumbers
+public function boot()
+{
+    $agent = new Agent();
+
+    if ($agent->isMobile()) {
+        View::addLocation(resource_path('views/mobile'));
+    } else {
+        View::addLocation(resource_path('views/desktop'));
+    }
+}
+```
