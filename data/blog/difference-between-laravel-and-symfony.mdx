@@ -1,0 +1,74 @@
+---
+title: 'Từ Laravel sang Symfony - Những điểm giống và khác nhau của hai framework'
+date: 2021-12-12T15:00:00Z
+lastmod: '2021-12-12'
+tags: ['laravel', 'symfony']
+draft: false
+summary: 'Do yêu cầu công việc nên mình có cơ hội được tiếp xúc và làm việc với Symfony, ở bài này mình sẽ tổng hợp lại kiến thức trong quá trình làm việc'
+layout: PostSimple
+image: https://symfony.com/images/opengraph/symfony.png
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Mở bài
+
+Dạo gần đây mình bắt đầu chuyển từ Laravel sang Symfony do yêu cầu của dự án. Vừa bắt đầu với Symfony thì mình lập tức cảm nhận được sự khác biệt đến từ Symfony và Laravel, cụ thể là trong cách cấu trúc thư mục cho đến cách nó hoạt động. Bài viết này để mình tổng hợp lại kiến thức đã tìm hiểu cũng như là một bài viết để các bạn có thể tham khảo khi chuyển sang một framework mới.
+
+## Mindset
+
+Cái mà làm mình chật vật nhất chính là mindset, do đã làm việc được với Laravel một khoảng thời gian nên việc bị ảnh hưởng bởi mindset của một framework là điều khó tránh. Thay vì thấy được điểm mạnh của Symfony thì mình chỉ thấy toàn những điểm yếu. Một hồi sau thì bình tâm lại, tìm tòi những điểm khác biệt và tìm hiểu lý do xem T**ại sao Symfony lại làm thế? Có điểm gì hay ho?**
+
+## CLI - "Artisan" trên Symfony và Laravel
+
+Làm việc với Laravel chắc chắn bạn không còn xa lạ gì với câu lệnh `php artisan` đó chính là anh trợ lý phù thuỷ giúp bạn hầu hết các công việc như tạo Model, Migration, Controller, ... và còn nhiều nữa. Còn trên Symfony chúng ta có `bin/console`. Hai cái này thì cũng như na ná nhau, chỉ có các câu lệnh là bạn phải học lại từ đầu. Mình chưa rõ build-in của `console` có thể hỗ trợ được cho ta những gì, nhưng nó vẫn có thể mở rộng và custom theo nhu cầu của bạn
+
+## Config - Cấu hình trên Symfony và Laravel
+
+Ở trong Laravel thì tất cả cấu hình sẽ nằm trong thư mục `/config` và tất cả đều là các file PHP. Còn đối với Symfony, nó có tất cả là 3 dạng cấu hình mặc định là Yaml, hai kiểu còn lại là XML và PHP. Việc Symfony chọn Yaml cũng không có gì là quá khó hiểu, các file Yaml thể hiện rõ hơn các cặp giá trị - thuộc tính, nếu nói một cách khách quan thì nó phù hợp hơn hẳn việc sử dụng một file PHP với mảng.
+
+## Route - Định tuyến trên Symfony và Laravel
+
+Cái thứ hai cần phải là quen đó chính là route trên Symfony, ở trên Symfony file cấu hình route mặc định sẽ là file `config/routes.yaml` tương tự như các file cấu hình, nó vẫn hỗ trợ XML và PHP. Đặc biệt hơn, trên Symfony sẽ support thêm hai kiểu khai báo khác đó chính là Attributes (hỗ trợ từ phiên bản PHP 8) và Annotations
+
+Ví dụ về attribute:
+
+```php
+class LuckyController
+{
+    #[Route('/lucky/number')]
+    public function number(): Response
+    {
+        // this looks exactly the same
+    }
+}
+```
+
+Ví dụ cho Annotation:
+
+```php
+class LuckyController
+{
+    /**
+     * @Route("/lucky/number")
+     */
+    public function number(): Response
+    {
+        // this looks exactly the same
+    }
+}
+```
+
+Về cụ thể những cái này mình nghĩ là mình sẽ có một bài viết cụ thể sau.
+
+## Symfony Form
+
+_Hứa sẽ viết mà!_
+
+## Doctrine và Eloquent
+
+_Hứa sẽ viết mà!_
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
