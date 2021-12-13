@@ -1,0 +1,66 @@
+---
+title: 'Chuyển đổi phím chức năng phím trên Windows với AutoHotKey'
+date: 2021-12-13T23:00:00Z
+lastmod: '2021-12-13'
+tags: ['windows', 'tip']
+draft: false
+summary: 'Phần mềm này vô cùng gọn nhẹ nhưng, nó giúp bạn có thể dễ dàng tuỳ biến bàn phím của mình một cách đặc biệt mạnh mẽ'
+layout: PostSimple
+image: https://heliotech-public.s3.ap-southeast-1.amazonaws.com/posts/gitlab-ci/1.png
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Tản mạn
+
+Mình vừa chuyển sang sử dụng một máy mới các bạn ạ, và nếu các bạn đã biết thì sẽ nhiều khi ta quen layout phím rồi, khi chuyển sang layout khác thì lại sử dụng không quen, hay bấm nhầm. Thế là mình phải tìm một cách gì đó hiệu quả để thay đổi chức năng phím (remap) mà phải hoạt động tốt với các ứng dụng khác, không làm xung đột
+
+## AutoHotKey - giải pháp nhanh gọn
+
+Phần mềm này vô cùng gọn nhẹ nhưng đặc biệt mạnh mẽ, khác với các phần mềm thông thường, AutoHotKey giống như một bộ biên dịch, bạn cần chức năng maping bàn phím như thế nào, viết một file chương trình và lưu với định dạng `.ahk` sau đó trình biên dịch sẽ tạo cho bạn một file `.exe` bạn có thể copy file này chạy ở bất kỳ máy nào.
+
+- Link tải về: [https://www.autohotkey.com/](https://www.autohotkey.com/)
+- Tài liệu hướng dẫn: [https://www.autohotkey.com/docs/AutoHotkey.htm](https://www.autohotkey.com/docs/AutoHotkey.htm)
+
+## Thay đổi chức năng phím:
+
+Quay lại nhu cầu ở đầu bài, mình cần thay đổi chức năng của 4 phím **Home, End, PageUp, PageDown**
+
+Vị trí của bàn phím gốc sẽ là: **PageUp, PageDown, Home, End**
+
+Và mình muốn thay đổi nó thành: **Home, PageUp, PageDown, End**
+
+### Tạo một file .ahk
+
+File `.ahk` sẽ là nơi để bạn định nghĩa những thao tác mà chương trình sẽ chạy, ví dụ dưới đây mình đơn giản là đổi chức năng phím:
+
+```
+PgUp::Home
+PgDn::PgUp
+Home::PgDn
+End::End
+```
+
+### Biên dịch file .exe để sử dụng:
+
+Mở chương trình biên dịch **Ahk2exe** lên:
+
+<S3Image src="/posts/autohotkey/1.png" />
+
+Ở phần **Source (script file)** bạn chọn cái file script lúc ở bước trên, sau đó bấm **>Convert<**
+
+Bạn sẽ thấy một file .exe ở cùng thư mục với thư mục chứa file script. Chạy file đó và done, bạn hãy kiểm tra thử xem có đúng phím không nhé!
+
+### Khởi động cùng Windows
+
+Ở trên Windows, nếu bạn muốn chạy một ứng dụng khi khởi động, chỉ cần tạo shortcut của nó trong thư mục **Startup**. Mở hộp thoại Run (Ctrl+R) và mở thư mục Startup lên:
+
+```
+C:\Users\[username]\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+```
+
+Nhớ đổi `[username]` lại nhé. Copy file `.exe` lúc nãy vào đây.
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
