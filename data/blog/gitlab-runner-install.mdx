@@ -1,0 +1,159 @@
+---
+title: 'Cài đặt và cấu hình Gitlab runner để chạy Gitlab CI'
+date: 2022-01-09T21:00:00Z
+lastmod: '2022-01-09'
+tags: ['gitlab', 'docker']
+draft: false
+summary: 'Gitlab Runner là một phần mềm chạy trên máy tính cho phép Gitlab sử dụng máy tính như một runner để chạy các cấu hình CI/CD, việc này giúp bạn tối ưu chi phí khi sử dụng hết free quota hàng tháng của Gitlab'
+layout: PostSimple
+image: https://heliotech-public.s3.ap-southeast-1.amazonaws.com/posts/gitlab-ci/1.png
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Giới thiệu
+
+Trong bài viết trước mình đã có hướng dẫn cấu hình Gitlab CI để tự động test và deploy ứng dụng một cách dễ dàng, tuy nhiên có một vấn đề nho nhỏ là Gitlab chỉ cho chúng ta sử dụng free 400 phút pipeline miễn phí mỗi tháng, và nếu cần sử dụng thêm bạn phải trả phí 10$/1000 phút tiếp theo.
+
+## Gitlab runner là gì?
+
+Gitlab Runner là một phần mềm chạy trên máy tính cho phép Gitlab sử dụng máy tính như một runner để chạy các cấu hình CI/CD. Việc cài đặt Gitlab Runner cũng vô cùng đơn giản, bạn chỉ cần cài đặt phần mềm trên máy tính hoặc máy chủ VPS, khai báo nó với Gitlab, vậy là xong.
+
+## Môi trường cài đặt
+
+Trong bài viết này mình sẽ hướng dẫn trên VPS có cấu hình như sau:
+
+- Hệ điều hành Ubuntu 20.04
+- Các phần mềm sẽ cài đặt: Docker, Gitlab Runner
+
+## Cài đặt Docker trên VPS Ubuntu
+
+Gitlab Runner có thể chạy được với đa dạng các executor như docker, kubernete, shell, virtualbox, ... trong bài viết này mình sẽ xử dụng docker cho đơn giản nhé.
+
+**Hướng dẫn các bước cài đặt:** [https://docs.docker.com/engine/install/ubuntu/#installation-methods](https://docs.docker.com/engine/install/ubuntu/#installation-methods)
+
+Khởi chạy docker-engine
+
+```bash
+$ systemctl start docker
+```
+
+## Cài đặt Gitlab Runner trên VPS Ubuntu
+
+Tải về trình cài đặt tương ứng với hệ điều hành:
+
+```bash
+# 64 bit
+$ curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"
+
+# 32 bit
+$ curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_386.deb"
+```
+
+Cài đặt thông qua `dpkg`:
+
+```bash
+# 64 bit
+$ dpkg -i gitlab-runner_amd64.deb
+
+# 32 bit
+$ dpkg -i gitlab-runner_386.deb
+```
+
+### Tạo user cho Gitlab-Runner
+
+Có thể bạn sẽ bỏ qua bước này, nếu bạn chạy lệnh `install` mà không cấu hình tài khoản cho Gitlab Runer thì nó sẽ trả về thông báo:
+
+```bash
+FATAL: Please specify user that will run gitlab-runner service
+```
+
+Tạo tài khoản bằng lệnh sau:
+
+```bash
+$ sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+```
+
+### Cài đặt Gitlab Runner
+
+```bash
+$ gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+Runtime platform ...
+```
+
+### Khởi động Gitlab Runner
+
+```bash
+$ gitlab-runner start
+```
+
+### Đăng ký runner với Gitlab
+
+Bây giờ bạn hãy Đăng nhập vào Gitlab, trong repo hãy chọn **Settings > CI/CD > Runners**
+
+Ở đây bạn sẽ thấy một cái URL và Token như sau:
+
+<S3Image src="/posts/gitlab-runner-install/2.png" />
+
+Quay trở lại VPS và chạy lệnh:
+
+```bash
+$ gitlab-runner register
+```
+
+Nó sẽ yêu cầu một số cấu hình, bạn có thể làm như sau:
+
+```bash
+Enter the GitLab instance URL (for example, https://gitlab.com/):
+https://gitlab.com/
+
+Enter the registration token:
+vVYoRzZ82sh_y3g6c9Lk # This fake
+
+Enter a description for the runner:
+display-name-you-want
+
+Enter tags for the runner (comma-separated):
+
+Registering runner... succeeded                     runner=jyvG2qNy
+Enter an executor: ssh, docker-ssh+machine, kubernetes, custom, docker-ssh, parallels, shell, docker, virtualbox, docker+machine:
+docker
+
+Enter the default Docker image (for example, ruby:2.6):
+ruby:2.6
+
+Runner registered successfully. Feel free to start it, but if it\'s running already the config should be automatically reloaded!
+```
+
+Sau đó restart lại runner:
+
+```bash
+$ gitlab-runner restart
+```
+
+Kiểm tra lại trên Gitlab xem runner của bạn đã có tick xanh chưa nhé
+
+<S3Image src="/posts/gitlab-runner-install/3.png" />
+
+Nếu chưa có dấu xanh, hãy chạy lệnh sau:
+
+```bash
+$ gitlab-runner verify
+```
+
+## Các lỗi khác
+
+**Lỗi 1: Failed to remove network for build**
+
+```bash
+ERROR: Failed to remove network for build
+ERROR: Preparation failed: Cannot connect to the Docker daemon
+```
+
+**Nguyên nhân:** Docker chưa cài đặt hoặc chưa chạy, xem lại bước Cài đặt Docker
+
+Nếu bạn còn gặp bất cứ lỗi gì khác, có thể bình luận ở phía dưới, mình sẽ hỗ trợ nếu có thể. Cảm ơn bạn đã xem.
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
