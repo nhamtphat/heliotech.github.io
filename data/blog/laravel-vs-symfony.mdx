@@ -1,0 +1,131 @@
+---
+title: 'Điểm khác nhau giữa Laravel và Symfony'
+date: 2022-04-05T12:00:00Z
+lastmod: '2022-04-05'
+tags: ['laravel', 'symfony']
+draft: false
+summary: 'Symfony và Laravel đều là framework mã nguồn mở được viết dựa trên ngôn ngữ PHP, liệu rằng Symfony có những điểm mạnh và điểm yếu như thế nào so với Laravel?'
+layout: PostSimple
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+# Symfony
+
+Symfony là một framework mã nguồn mở được viết dựa trên ngôn ngữ PHP, khác với một framework khác đang rất nổi tiếng là Laravel thì Symfony có những điểm mạnh và điểm yếu như thế nào, hãy cùng mình tìm hiểu nhé.
+
+## Điểm chung của Laravel và Symfony
+
+### Cấu trúc MVC:
+
+Điều dễ nhận ra nhất giữa hai framework này là chính là xây dựng ứng dụng tách các thành phần Model - View - Controller. Ở Laravel chúng ta có Blade Engine thì với Symfony là **Twig**
+
+### Được viết dựa trên PHP:
+
+Tất nhiên rồi, cả hai framework này đều được viết trên PHP.
+
+| PHP | Laravel | Symfony       |
+| --- | ------- | ------------- |
+| 7.1 | 5.6     | 4.4           |
+| 7.2 | 6.x     | 4.4, 5.4      |
+| 7.3 | 8.x     | 4.4, 5.4      |
+| 7.4 | 8.x     | 4.4, 5.4      |
+| 8.0 | 9.x     | 4.4, 5.4, 6.0 |
+
+## Điểm đặc biệt của Symfony
+
+### Twig thay vì Blade
+
+Bạn sẽ thấy giữa Twig và Blade sẽ có chút tương đồng, tuy nhiên đối với template engine, mình thực sự ấn tượng hơn bởi blade bởi có nhiều hàm tích hợp hơn, cấu trúc rõ ràng và thuận mắt hơn:
+
+**Blade:**
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Welcome to Symfony!</title>
+  </head>
+  <body>
+    <h1>{{ page_title }}</h1>
+
+    @auth Hello {{ user.name }}! @endauth {!! ... !!}
+  </body>
+</html>
+```
+
+**Twig:**
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Welcome to Symfony!</title>
+  </head>
+  <body>
+    <h1>{{ page_title }}</h1>
+
+    {% if user.isLoggedIn %} Hello {{ user.name }}! {% endif %} {# ... #}
+  </body>
+</html>
+```
+
+### Doctrine thay vì Eloquent:
+
+Để nói rõ hơn về Doctrine, có lẽ sẽ cần một bài viết dài. Nói ngắn gọn, sử dụng Doctrine sẽ phức tạp hơn sử dụng Eloquent rất nhiều, tuy nhiên lợi ích của nó là tính chặt chẽ trong code của bạn. Ví dụ ta có một model User, và nhiệm vụ của chúng ta là tạo một User với tên lả Helio vào CSDL.
+
+**Eloquent:**
+
+```php
+class User extends Eloquent {
+    protected $fillable = ['name'];
+}
+
+class UserController {
+    public function createUser($name}
+    {
+        $user = User::create([
+            'name' => $name
+        ]);
+
+        return $user->name;
+    }
+}
+```
+
+**Doctrine:**
+
+```php
+class User {
+    /**
+    * @var string
+    */
+    private $name;
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name)
+    {
+        $this->name = $name;
+    }
+}
+
+class UserController {
+    public function createUser($name}
+    {
+        $user = new User();
+        $user->setName($name);
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $user->getName();
+    }
+}
+```
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
