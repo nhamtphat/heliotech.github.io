@@ -1,0 +1,86 @@
+---
+title: 'AI đơn giản - Phân loại văn bản (Text Classification)'
+date: 2023-01-15T23:00:00Z
+lastmod: '2023-01-15
+tags: ['ai', 'transformer']
+draft: false
+summary: '
+layout: PostSimple
+image: https://heliotech-public.s3.ap-southeast-1.amazonaws.com/posts/gitlab-ci/1.png
+---
+
+## Mục lục
+
+<TOCInline toc={props.toc} exclude="Mục lục" toHeading={3} />
+
+## Một cái "thử" với AI
+Có lẽ bạn đã từng nghe đến AI, Machine Learning, Deep Learning, ... nhưng chưa bao giờ thử làm một cái gì đó với nó. Bài viết này sẽ giúp bạn làm một cái gì đó với AI, đó là phân loại văn bản (Text Classification). Bạn sẽ tạo một AI đơn giản để phân loại các bài viết trên blog này là bài viết về AI hay không.
+
+## AI là gì?
+Nói ngắn gọn, AI là thuật ngữ chỉ các phần mềm máy tính cho phép máy tính có thể mô phỏng cách con người suy nghĩ. Nó được sinh ra để giải quyết một số hạn chế của lập trình truyền thống chỉ bao gồm if ... else ...
+
+AI giúp chúng ta tìm ra các công thức, các quy luật, các mẫu dữ liệu từ dữ liệu thực tế. Ví dụ, chúng ta có thể dùng AI để tìm ra các quy luật để phân loại các bài viết trên blog này là bài viết về AI hay không.
+
+Bạn có thể viết một đoạn mã đơn giản như tìm kiếm từ khóa "ai" trong toàn bộ văn bản, nếu có thì đó là bài viết về AI. Nhưng nếu bạn làm như vậy thì có thể sai số nếu như "ai đó" cũng có từ "ai" nhưng nó không đúng.
+
+Một ví dụ khác chính là phân loại bình luận "tích cực" hay "tiêu cực" trên mạng xã hội. Hoặc "spam" hay "không phải spam" trong email.
+
+## Phân loại văn bản (Text Classification)
+
+Như ví dụ ở trên, phân loại văn bản là một trong những ví dụ đơn giản và thực tế, nó đủ đơn giản để bạn có thể thử làm một cái gì đó với AI.
+
+## Phân loại văn bản với Transformer
+
+Dưới đây chúng ta sẽ làm một ứng dụng siêu đơn giản với Transformer Pipeline, nó sẽ phân loại một đoạn văn là tích cực (positive) hay tiêu cực (negative). Đừng lo, mình sẽ giải thích sau!!!
+
+Bạn hãy truy cập vào Google Colab để thực hành nhé. Tạo một notebook mới và copy đoạn mã sau:
+
+```python
+from transformers import pipeline
+
+classifier = pipeline("sentiment-analysis")
+```
+
+Sau đó thì chạy thử nào:
+
+```
+classifier("We are very happy to show you the 🤗 Transformers library.")
+```
+Kết quả:
+```
+[{'label': 'POSITIVE', 'score': 0.9997795224189758}]
+```
+
+Thử lại cái nữa nhé
+```
+classifier("We are very sad to show you the 🤗 Transformers library.")
+```
+Kết quả:
+```
+{'label': 'NEGATIVE', 'score': 0.9988054037094116}]
+```
+
+Bạn cũng có thể thử với một đoạn văn bất kỳ, ví dụ như đoạn văn này:
+```
+classifier("I love sci-fi and am willing to put up with a lot. Sci-fi movies/TV are usually underfunded, under-appreciated and misunderstood. I tried to like this, I really did, but it is to good TV sci-fi as Babylon 5 is to Star Trek (the original). Silly prosthetics, cheap cardboard sets, stilted dialogues, CG that doesn't match the background, and painfully one-dimensional characters cannot be overcome with a 'sci-fi' setting. (I'm sure there are those of you out there who think Babylon 5 is good sci-fi TV. It's not. It's clichéd and uninspiring.) While US viewers might like emotion and character development, sci-fi is a genre that does not take itself seriously (cf. Star Trek). It may treat important issues, yet not as a serious philosophy. It's really difficult to care about the characters here as they are not simply foolish, just missing a spark of life. Their actions and reactions are wooden and predictable, often painful to watch. The makers of Earth KNOW it's rubbish as they have to always say \"Gene Roddenberry's Earth...\" otherwise people would not continue watching. Roddenberry's ashes must be turning in their orbit as this dull, cheap, poorly edited (watching it without advert breaks really brings this home) trudging Trabant of a show lumbers into space. Spoiler. So, kill off a main character. And then bring him back as another actor. Jeeez! Dallas all over again")
+```
+
+## Giải thích
+
+Trong ví dụ trên, chúng ta đã sử dụng một mô hình đã được huấn luyện sẵn (pretrained model) để phân loại văn bản là tích cực hay tiêu cực.
+Hiểu đơn giản rằng mô hình này đã được "một ai đó" huấn luyện trước đó và tinh chỉnh kết quả cho phù hợp với công việc của họ. Và sau đó họ chia sẻ nó cho cộng đồng.
+Trong một một vài trường hợp, bạn chỉ cần tìm đúng một mô hình phù hợp với công việc của bạn và sử dụng nó. Bạn không cần phải huấn luyện nó từ đầu.
+
+Tuy nhiên, trong đa số các trường hợp khác, các pretrained model này có thể không phù hợp với công việc của bạn.
+Ví dụ, bạn muốn phân loại các bài viết trên blog này là bài viết về AI hay không. Trong trường hợp này, bạn cần phải huấn luyện lại mô hình (fine-tuning) để nó có thể phân loại được các bài viết trên blog này là bài viết về AI hay không.
+
+## Fine-tuning
+
+Fine-tuning là quá trình huấn luyện lại mô hình đã được huấn luyện sẵn (pretrained model) để nó có thể phù hợp với công việc của bạn.
+Bạn sẽ cung cấp cho mô hình một tập dữ liệu (dataset) và mô hình sẽ tự động học các quy luật từ tập dữ liệu đó.
+Việc này mình sẽ viết ở một bài viết khác, còn bây giờ thì bạn hãy thử làm một cái gì đó với AI nhé.
+
+
+Bạn có thể xem toàn bộ đoạn mã trên [Google Colab](https://colab.research.google.com/drive/1riEou3zs-NIsqyhx3CQUYkO4XhFTdaU5?usp=sharing).
+
+<BlogNewsletterForm title="Đăng ký nhận thông báo" />
